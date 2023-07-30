@@ -1,0 +1,7 @@
+mysql:
+  url: 127.0.0.1
+  userName: root
+  password: ciyeweiyang1314
+  dbname: skyline
+  post: 3306
+redis:
