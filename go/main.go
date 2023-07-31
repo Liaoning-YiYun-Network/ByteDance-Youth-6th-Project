@@ -5,6 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @title 简易版抖音
+// @version 0.0.1
+// @description 简易版抖音开发接口文档目录
 func main() {
 	go service.RunMessageServer()
 

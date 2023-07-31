@@ -1,0 +1,33 @@
+info:
+  contact: {}
+  description: 简易版抖音开发接口文档目录
+  title: 简易版抖音
+  version: 0.0.1
+paths:
+  /swaggereget:
+    get:
+      description: GET请求的例子描述
+      parameters:
+      - description: Account ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      responses: {}
+      summary: GET请求的例子
+      tags:
+      - Swagger请求示例
+  /swaggerpost:
+    post:
+      description: POST请求的例子描述
+      parameters:
+      - description: Account ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      responses: {}
+      summary: POST请求的例子
+      tags:
+      - Swagger请求示例
+swagger: "2.0"
