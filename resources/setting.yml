@@ -1,0 +1,14 @@
+server: #项目配置
+  port: 9090
+db: #数据库配置
+  url: 127.0.0.1
+  userName: root
+  password: ciyeweiyang1314
+  dbname: skyline
+  port: 3306
+redis: #redis配置
+  url: 127.0.0.1
+  userName:
+  password:
+  dbname: 0
+  port: 6379
