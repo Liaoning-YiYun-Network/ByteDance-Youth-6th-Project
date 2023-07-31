@@ -1,8 +1,8 @@
 package main
 
 import (
+	"SkyLine/cmd"
 	"SkyLine/service"
-	"github.com/gin-gonic/gin"
 )
 
 // @title 简易版抖音
@@ -10,10 +10,7 @@ import (
 // @description 简易版抖音开发接口文档目录
 func main() {
 	go service.RunMessageServer()
+	//进行一系列的初始化操作
+	cmd.Start()
 
-	r := gin.Default()
-
-	initRouter(r)
-
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

@@ -1,14 +1,33 @@
-package main
+package router
 
 import (
 	controller2 "SkyLine/controller"
 	_ "SkyLine/docs"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func initRouter(r *gin.Engine) {
+// 初始化路由
+func InitRouter() {
+	r := gin.Default()
+
+	InitBasePlatformRouter(r)
+	setPort := viper.GetString("server.port")
+	if setPort != "" {
+		fmt.Println("启用的端口号为:" + setPort)
+	}
+
+	err := r.Run(fmt.Sprintf(":%s", setPort))
+	if err != nil {
+		fmt.Println("路由初始化失败")
+	}
+}
+
+// 该方法中添加路由
+func InitBasePlatformRouter(r *gin.Engine) {
 	// public directory is used to serve static resources
 	r.Static("/static", "./public")
 
@@ -46,4 +65,5 @@ func initRouter(r *gin.Engine) {
 	apiRouter.GET("/relation/friend/list/", controller2.FriendList)
 	apiRouter.GET("/message/chat/", controller2.MessageChat)
 	apiRouter.POST("/message/action/", controller2.MessageAction)
+
 }
