@@ -2,14 +2,28 @@ package main
 
 import (
 	controller2 "SkyLine/controller"
+	_ "SkyLine/docs"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func initRouter(r *gin.Engine) {
 	// public directory is used to serve static resources
 	r.Static("/static", "./public")
 
+	// ===========================swagger文档路由===================================
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	//=============================================================================
+
 	apiRouter := r.Group("/douyin")
+
+	// ============================swagger文档创建测试===============================
+	//get请求
+	apiRouter.GET("/swaggereget/", controller2.Swaggerget)
+	//post请求
+	apiRouter.GET("/swaggerpost/", controller2.Swaggerpost)
+	// ============================================================================
 
 	// basic apis
 	apiRouter.GET("/feed/", controller2.Feed)

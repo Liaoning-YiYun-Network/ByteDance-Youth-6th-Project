@@ -1,0 +1,49 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "简易版抖音开发接口文档目录",
+        "title": "简易版抖音",
+        "contact": {},
+        "version": "0.0.1"
+    },
+    "paths": {
+        "/swaggereget": {
+            "get": {
+                "description": "GET请求的例子描述",
+                "tags": [
+                    "Swagger请求示例"
+                ],
+                "summary": "GET请求的例子",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/swaggerpost": {
+            "post": {
+                "description": "POST请求的例子描述",
+                "tags": [
+                    "Swagger请求示例"
+                ],
+                "summary": "POST请求的例子",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    }
+}
