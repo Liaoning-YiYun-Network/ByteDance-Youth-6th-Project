@@ -1,5 +1,6 @@
 package entity
 
+// SQLUser 数据库中的用户表
 type SQLUser struct {
 	UserId     int    `gorm:"column:userid;primary_key"`
 	UserName   string `gorm:"column:username"`

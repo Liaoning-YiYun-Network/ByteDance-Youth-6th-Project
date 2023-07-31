@@ -32,6 +32,9 @@ func (c *MySQLConfig) getConf() *MySQLConfig {
 
 var SqlSession *gorm.DB
 
+// InitMySql 初始化数据库连接
+//
+// 返回值：err
 func InitMySql() (err error) {
 	var c MySQLConfig
 	//获取yaml配置参数
@@ -53,6 +56,9 @@ func InitMySql() (err error) {
 	return SqlSession.DB().Ping()
 }
 
+// CloseMySql 关闭数据库连接
+//
+// 返回值：无
 func CloseMySql() {
 	//关闭数据库连接
 	SqlSession.Close()

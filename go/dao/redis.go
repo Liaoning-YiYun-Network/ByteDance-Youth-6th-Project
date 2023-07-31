@@ -16,7 +16,7 @@ type RedisConfig struct {
 }
 
 func (c *RedisConfig) getConf() *RedisConfig {
-	//读取resources/mysql.yaml文件
+	//读取resources/redis.yaml文件
 	yamlFile, err := os.ReadFile("resources/redis.yaml")
 	//若出现错误，打印错误提示
 	if err != nil {
@@ -32,6 +32,9 @@ func (c *RedisConfig) getConf() *RedisConfig {
 
 var RedisSession *gorm.DB
 
+// InitRedis 初始化Redis连接
+//
+// 返回值：err
 func InitRedis() (err error) {
 	var c RedisConfig
 	//获取yaml配置参数
@@ -53,6 +56,9 @@ func InitRedis() (err error) {
 	return RedisSession.DB().Ping()
 }
 
+// CloseRedis 关闭Redis连接
+//
+// 返回值：无
 func CloseRedis() {
 	//关闭数据库连接
 	RedisSession.Close()

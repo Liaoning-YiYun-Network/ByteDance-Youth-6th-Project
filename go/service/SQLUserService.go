@@ -6,11 +6,19 @@ import (
 )
 
 // CreateSQLUser 创建用户
+//
+// user: 用户实体
+//
+// return: 错误
 func CreateSQLUser(user *entity.SQLUser) error {
 	return dao.SqlSession.Create(user).Error
 }
 
 // GetSQLUserById 根据id获取用户
+//
+// id: 用户id
+//
+// return: 用户实体/错误
 func GetSQLUserById(id int) (*entity.SQLUser, error) {
 	user := new(entity.SQLUser)
 	err := dao.SqlSession.Where("userid = ?", id).First(user).Error
@@ -18,6 +26,10 @@ func GetSQLUserById(id int) (*entity.SQLUser, error) {
 }
 
 // GetSQLUserByName 根据用户名获取用户
+//
+// name: 用户名
+//
+// return: 用户实体/错误
 func GetSQLUserByName(name string) (*entity.SQLUser, error) {
 	user := new(entity.SQLUser)
 	err := dao.SqlSession.Where("username = ?", name).First(user).Error
@@ -25,16 +37,26 @@ func GetSQLUserByName(name string) (*entity.SQLUser, error) {
 }
 
 // UpdateSQLUser 更新用户
+//
+// user: 用户实体
+//
+// return: 错误
 func UpdateSQLUser(user *entity.SQLUser) error {
 	return dao.SqlSession.Save(user).Error
 }
 
 // DeleteSQLUser 删除用户
+//
+// user: 用户实体
+//
+// return: 错误
 func DeleteSQLUser(user *entity.SQLUser) error {
 	return dao.SqlSession.Delete(user).Error
 }
 
 // GetSQLUserList 获取用户列表
+//
+// return: 用户列表/错误
 func GetSQLUserList() ([]*entity.SQLUser, error) {
 	var users []*entity.SQLUser
 	err := dao.SqlSession.Find(&users).Error

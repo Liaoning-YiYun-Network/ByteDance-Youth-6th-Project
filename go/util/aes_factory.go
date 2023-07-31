@@ -8,6 +8,15 @@ import (
 	"io"
 )
 
+// EncryptWithAES 使用AES加密数据
+//
+// key: 密钥，长度必须为16、24或32字节以分别选择AES-128、AES-192或AES-256
+//
+// data: 待加密的数据
+//
+// 返回值1: 加密后的数据，十六进制字符串
+//
+// 返回值2: 错误信息
 func EncryptWithAES(key []byte, data string) (string, error) {
 
 	// 待加密的数据
@@ -39,6 +48,15 @@ func EncryptWithAES(key []byte, data string) (string, error) {
 	return ciphertextHex, nil
 }
 
+// DecryptWithAES 使用AES解密数据
+//
+// key: 密钥，长度必须为16、24或32字节以分别选择AES-128、AES-192或AES-256
+//
+// data: 待解密的数据，十六进制字符串
+//
+// 返回值1: 解密后的数据
+//
+// 返回值2: 错误信息
 func DecryptWithAES(key []byte, data string) (string, error) {
 
 	// 将十六进制字符串转换为字节切片
