@@ -54,25 +54,8 @@ swag init
 
 启动项目，然后就可以访问上面提到的接口文档地址来查看接口文档了
 
-效果如下图
-
-![image-20230731145653930](C:\Users\86155\AppData\Roaming\Typora\typora-user-images\image-20230731145653930.png)
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-=======
-
-# SkyLine
->>>>>>> b398500f9025156085a70459470b16d3e5bf0b30
