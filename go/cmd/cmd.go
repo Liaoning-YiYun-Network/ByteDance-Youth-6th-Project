@@ -5,7 +5,6 @@ import (
 	"SkyLine/dao"
 	"SkyLine/router"
 	"fmt"
-	"tencent.com/mmkv"
 )
 
 // Start 项目启动初始化各种配置
@@ -26,6 +25,4 @@ func Start() {
 		fmt.Println("redis初始化失败，请检查redis配置是否正确，运行终止！")
 		panic(err)
 	}
-	//初始化MMKV
-	mmkv.InitializeMMKV("./data/mmkv")
 }

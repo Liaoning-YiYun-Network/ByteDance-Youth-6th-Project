@@ -6,7 +6,6 @@ require (
 	github.com/gavv/httpexpect/v2 v2.15.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/stretchr/testify v1.8.4
-	tencent.com/mmkv v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -92,5 +91,3 @@ require (
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-replace tencent.com/mmkv => ./dependencies/tencent.com/mmkv
