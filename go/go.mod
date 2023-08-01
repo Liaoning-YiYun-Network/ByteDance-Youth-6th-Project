@@ -6,6 +6,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.15.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/stretchr/testify v1.8.4
+	tencent.com/mmkv v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -66,7 +67,6 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	moul.io/http2curl/v2 v2.3.0 // indirect
-	tencent.com/mmkv v0.0.0-00010101000000-000000000000 // indirect
 )
 
 require (
