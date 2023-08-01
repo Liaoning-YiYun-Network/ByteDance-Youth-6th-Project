@@ -66,16 +66,17 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	moul.io/http2curl/v2 v2.3.0 // indirect
+	tencent.com/mmkv v0.0.0-00010101000000-000000000000 // indirect
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/bytedance/sonic v1.10.0-rc3 // indirect
-	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/go-openapi/jsonpointer v0.20.0 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/spec v0.20.9 // indirect
 	github.com/go-playground/validator/v10 v10.14.1 // indirect
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/jinzhu/gorm v1.9.16
 	github.com/klauspost/compress v1.16.7 // indirect
