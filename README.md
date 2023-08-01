@@ -1,3 +1,18 @@
+### 基础环境配置
+
+#### 安装CMake
+
+下载地址：[CMake](https://cmake.org/download/)
+
+#### 安装GCC
+
+下载地址：[GCC](https://gcc.gnu.org/install/)
+安装教程：[GCC安装教程](http://t.csdn.cn/6v4BJ)
+
+### 编译错误解决方案
+
+在环境变量中添加`CGO_ENABLED=1`，然后重新编译
+
 ###  swagger使用文档
 
 接口文档地址：[Swagger UI](http://localhost:8080/swagger/index.html)
