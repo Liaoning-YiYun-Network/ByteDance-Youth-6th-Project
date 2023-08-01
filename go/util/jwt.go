@@ -3,7 +3,7 @@ package util
 // 使用jwt进行token的生成和解析
 import (
 	"SkyLine/entity"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
 
@@ -11,7 +11,7 @@ import (
 type Claims struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-	jwt.StandardClaims
+	jwt.MapClaims
 }
 
 // GenerateToken 生成token
@@ -22,11 +22,13 @@ func GenerateToken(user entity.SQLUser) (string, error) {
 	claims := Claims{
 		Username: user.UserName,
 		Password: user.Password,
-		StandardClaims: jwt.StandardClaims{
+		MapClaims: jwt.MapClaims{
 			//设置token过期时间
-			ExpiresAt: expireTime.Unix(),
+			"exp": expireTime.Unix(),
+			//设置token发放时间
+			"iat": time.Now().Unix(),
 			//设置token发放者
-			Issuer: "SkyLine",
+			"iss": "SkyLine",
 		},
 	}
 	//使用指定的签名方法创建签名对象
