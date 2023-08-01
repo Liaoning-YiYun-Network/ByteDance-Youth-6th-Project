@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// 使用viper读取配置文件
+// InitConfig 使用viper读取配置文件
 func InitConfig() {
 	viper.SetConfigName("setting")
 	viper.SetConfigType("yml")
