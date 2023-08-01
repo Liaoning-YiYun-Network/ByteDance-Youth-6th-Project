@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"SkyLine/data"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"gopkg.in/yaml.v3"
@@ -17,7 +18,13 @@ type MySQLConfig struct {
 
 func (c *MySQLConfig) getConf() *MySQLConfig {
 	//读取resources/mysql.yaml文件
-	yamlFile, err := os.ReadFile("resources/mysql.yaml")
+	var yamlFile []byte
+	var err error
+	if data.OS == "windows" {
+		yamlFile, err = os.ReadFile("../resources/mysql.yaml")
+	} else {
+		yamlFile, err = os.ReadFile("resources/mysql.yaml")
+	}
 	//若出现错误，打印错误提示
 	if err != nil {
 		fmt.Println(err.Error())

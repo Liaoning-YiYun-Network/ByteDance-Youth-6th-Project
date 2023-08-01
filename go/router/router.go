@@ -16,9 +16,6 @@ func InitRouter() {
 
 	InitBasePlatformRouter(r)
 	setPort := viper.GetString("server.port")
-	if setPort != "" {
-		fmt.Println("启用的端口号为:" + setPort)
-	}
 
 	err := r.Run(fmt.Sprintf(":%s", setPort))
 	if err != nil {

@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"SkyLine/data"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"gopkg.in/yaml.v3"
@@ -17,7 +18,13 @@ type RedisConfig struct {
 
 func (c *RedisConfig) getConf() *RedisConfig {
 	//读取resources/redis.yaml文件
-	yamlFile, err := os.ReadFile("resources/redis.yaml")
+	var yamlFile []byte
+	var err error
+	if data.OS == "windows" {
+		yamlFile, err = os.ReadFile("../resources/redis.yaml")
+	} else {
+		yamlFile, err = os.ReadFile("resources/redis.yaml")
+	}
 	//若出现错误，打印错误提示
 	if err != nil {
 		fmt.Println(err.Error())
