@@ -21,7 +21,7 @@ func Start() {
 		fmt.Println("数据库初始化失败，请检查数据库配置是否正确，运行终止！")
 		panic(err)
 	}
-	fmt.Print("初始化数据库成功")
+	fmt.Println("初始化数据库成功")
 
 	//初始化redis
 	err = dao.InitRedis()
@@ -29,6 +29,7 @@ func Start() {
 		fmt.Println("redis初始化失败，请检查redis配置是否正确，运行终止！")
 		panic(err)
 	}
+	fmt.Println("初始化redis成功")
 
 	//将初始化路由放入最后，否则初始化路由后面的代码都不会执行
 	//初始化路由
