@@ -12,7 +12,10 @@ import (
 var chatConnMap = sync.Map{}
 
 func RunMessageServer() {
-	listen, err := net.Listen("tcp", "127.0.0.1:9090")
+	//若为app需要启用下面的
+	listen, err := net.Listen("tcp", ":10.0.2.2:9090")
+	//若为网页端，需要启用下面的
+	//listen, err := net.Listen("tcp", ":127.0.0.1:9090")
 	if err != nil {
 		fmt.Printf("Run message sever failed: %v\n", err)
 		return

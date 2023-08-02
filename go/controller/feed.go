@@ -17,7 +17,7 @@ type FeedResponse struct {
 // Feed same demo video list for every request
 func Feed(c *gin.Context) {
 	c.JSON(http.StatusOK, FeedResponse{
-		Response:  entity.Response{StatusCode: 0},
+		Response:  entity.Response{StatusCode: 0, StatusMsg: "无事发生"},
 		VideoList: data.Videos,
 		NextTime:  time.Now().Unix(),
 	})
