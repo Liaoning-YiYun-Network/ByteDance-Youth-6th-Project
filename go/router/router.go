@@ -10,10 +10,11 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// 初始化路由
+// InitRouter 初始化路由
 func InitRouter() {
 	r := gin.Default()
 
+	gin.SetMode(viper.GetString("server.mode"))
 	InitBasePlatformRouter(r)
 	setPort := viper.GetString("server.port")
 
@@ -23,7 +24,7 @@ func InitRouter() {
 	}
 }
 
-// 该方法中添加路由
+// InitBasePlatformRouter 该方法中添加路由
 func InitBasePlatformRouter(r *gin.Engine) {
 	// public directory is used to serve static resources
 	r.Static("/static", "./public")

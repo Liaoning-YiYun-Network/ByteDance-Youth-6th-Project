@@ -2,16 +2,18 @@ package dao
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
+	"github.com/go-redis/redis"
 	"github.com/spf13/viper"
+	"strconv"
+	"strings"
 )
 
 type RedisConfig struct {
-	Url      string `yaml:"url"`
-	UserName string `yaml:"userName"`
-	Password string `yaml:"password"`
-	DbName   string `yaml:"dbname"`
-	Port     string `yaml:"port"`
+	Url      string
+	UserName string
+	Password string
+	DbName   string
+	Port     string
 }
 
 func (c *RedisConfig) getConf() *RedisConfig {
@@ -23,31 +25,35 @@ func (c *RedisConfig) getConf() *RedisConfig {
 	return c
 }
 
-var RedisSession *gorm.DB
+var RedisSession *redis.Client
 
 // InitRedis 初始化Redis连接
 //
 // 返回值：err
 func InitRedis() (err error) {
 	var c RedisConfig
-	//获取yaml配置参数
 	conf := c.getConf()
-	fmt.Printf("redis配置文件参数：%#v\n", conf)
-	//将yaml配置参数拼接成连接数据库的url
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		conf.UserName,
-		conf.Password,
-		conf.Url,
-		conf.Port,
-		conf.DbName,
-	)
-	//连接数据库
-	RedisSession, err = gorm.Open("mysql", dsn)
+	strBuilder := strings.Builder{}
+	strBuilder.WriteString(conf.Url)
+	strBuilder.WriteString(":")
+	strBuilder.WriteString(conf.Port)
+	db, err := strconv.Atoi(conf.DbName)
 	if err != nil {
-		panic(err)
+		err := fmt.Errorf("redis db name is not a number")
+		return err
 	}
-	//验证数据库连接是否成功，若成功，则无异常
-	return RedisSession.DB().Ping()
+	RedisSession = redis.NewClient(&redis.Options{
+		Addr:     strBuilder.String(),
+		Password: conf.Password,
+		DB:       db,
+	})
+	pong, err := RedisSession.Ping().Result()
+	if err != nil {
+		err := fmt.Errorf("redis connect failed")
+		return err
+	}
+	fmt.Println("Redis Client Connect Response:", pong)
+	return nil
 }
 
 // CloseRedis 关闭Redis连接

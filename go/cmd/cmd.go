@@ -13,7 +13,7 @@ func Start() {
 	config.InitConfig()
 
 	defer dao.CloseMySql()
-	//defer dao.CloseRedis()
+	defer dao.CloseRedis()
 
 	//初始化数据库
 	err := dao.InitMySql()
@@ -24,11 +24,11 @@ func Start() {
 	fmt.Print("初始化数据库成功")
 
 	//初始化redis
-	//err = dao.InitRedis()
-	//if err != nil {
-	//	fmt.Println("redis初始化失败，请检查redis配置是否正确，运行终止！")
-	//	panic(err)
-	//}
+	err = dao.InitRedis()
+	if err != nil {
+		fmt.Println("redis初始化失败，请检查redis配置是否正确，运行终止！")
+		panic(err)
+	}
 
 	//将初始化路由放入最后，否则初始化路由后面的代码都不会执行
 	//初始化路由

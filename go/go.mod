@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/gavv/httpexpect/v2 v2.15.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/stretchr/testify v1.8.4
 )
