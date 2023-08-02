@@ -12,6 +12,9 @@ func Start() {
 	//初始化读取配置文件
 	config.InitConfig()
 
+	defer dao.CloseMySql()
+	//defer dao.CloseRedis()
+
 	//初始化数据库
 	err := dao.InitMySql()
 	if err != nil {
@@ -30,5 +33,4 @@ func Start() {
 	//将初始化路由放入最后，否则初始化路由后面的代码都不会执行
 	//初始化路由
 	router.InitRouter()
-
 }
