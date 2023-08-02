@@ -8,11 +8,11 @@ import (
 )
 
 type MySQLConfig struct {
-	Url      string `yaml:"url"`
-	UserName string `yaml:"userName"`
-	Password string `yaml:"password"`
-	DbName   string `yaml:"dbname"`
-	Port     string `yaml:"port"`
+	Url      string
+	UserName string
+	Password string
+	DbName   string
+	Port     string
 }
 
 func (c *MySQLConfig) getConf() *MySQLConfig {

@@ -90,5 +90,5 @@ require (
 	golang.org/x/arch v0.4.0 // indirect
 	golang.org/x/tools v0.11.1 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
