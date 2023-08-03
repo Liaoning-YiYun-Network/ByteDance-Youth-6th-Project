@@ -1,3 +1,4 @@
 ./go/SkyLine
 .DS_Store
 .idea
+build
