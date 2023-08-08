@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/volcengine/ve-tos-golang-sdk/v2/tos"
 )
@@ -45,7 +46,8 @@ func InitTOS() error {
 		tos.WithCredentials(credentials),
 		tos.WithRegion(viper.GetString("tos.region")),
 		tos.WithMaxRetryCount(3),
-		tos.WithEnableVerifySSL(true))
+		tos.WithEnableVerifySSL(true),
+		tos.WithLogger(logrus.New()))
 	return err
 }
 
@@ -59,8 +61,8 @@ func CloseTOS() {
 // fileName 文件名
 // fileContent 文件内容
 // fileType 文件类型
-// 返回requestID和错误信息
-func UploadFile(fileName string, fileContent []byte, fileType TOSFileType) (requestID string, err error) {
+// 返回错误信息
+func UploadFile(fileName string, fileContent []byte, fileType TOSFileType) error {
 	var pathPrefix string
 	switch fileType {
 	case VIDEO_COVER:
@@ -82,9 +84,6 @@ func UploadFile(fileName string, fileContent []byte, fileType TOSFileType) (requ
 		},
 		Content: reader,
 	})
-	if output.StatusCode != 200 {
-		fmt.Println("上传文件失败，错误码：", output.StatusCode, "，错误信息：", err)
-		return output.RequestID, err
-	}
-	return output.RequestID, err
+	fmt.Println("UploadFile: ", fileName, " Request ID: ", output.RequestID, " Status: ", output.StatusCode)
+	return err
 }
