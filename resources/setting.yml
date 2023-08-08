@@ -13,3 +13,11 @@ redis: #redis配置
   password:
   dbname: 0
   port: 6379
+tos:
+  endpoint-outside: https://tos-cn-beijing.volces.com
+  endpoint-inside: https://tos-cn-beijing.ivolces.com
+  useInner: false #此处默认使用外网地址，如果需要使用内网地址，请将此处改为true（请确保你在使用内网地址时，运行环境为火山引擎且地域与下方配置相同）
+  region: cn-beijing
+  bucketName: youth6th-test
+  accessKey: AKLTNjcxMjY1M2FiMDQ2NGY2ZjliYjExMjI4MGNlYjMzZTI
+  secretKey: T0RKbU5tRXpaV1E1TkdOaE5EZ3dORGhtWTJObFl6UmxZbU5rTlRrNVpERQ==
