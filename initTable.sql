@@ -12,6 +12,7 @@ create table user
     follower_count int default 0 not null,
     follow_db      varchar(128)  not null,
     follower_db    varchar(128)  not null,
+    favorite_db    varchar(64)   not null,
     primary key (userid)
 );
 create table video
