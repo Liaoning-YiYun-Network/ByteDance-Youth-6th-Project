@@ -10,6 +10,8 @@ type SQLUser struct {
 	Signature     string `gorm:"column:signature"`
 	FollowCount   int64  `gorm:"column:follow_count"`
 	FollowerCount int64  `gorm:"column:follower_count"`
+	FollowDB      string `gorm:"column:follow_db"`
+	FollowerDB    string `gorm:"column:follower_db"`
 }
 
 func (SQLUser) TableName() string {
