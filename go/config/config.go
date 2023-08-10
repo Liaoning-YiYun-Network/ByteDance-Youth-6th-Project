@@ -1,7 +1,6 @@
 package config
 
 import (
-	"SkyLine/data"
 	"fmt"
 	"github.com/spf13/viper"
 )
@@ -10,11 +9,7 @@ import (
 func InitConfig() {
 	viper.SetConfigName("setting")
 	viper.SetConfigType("yml")
-	if data.OS == "windows" {
-		viper.AddConfigPath("../resources/")
-	} else {
-		viper.AddConfigPath("resources/")
-	}
+	viper.AddConfigPath("./config/")
 	err := viper.ReadInConfig()
 	if err != nil {
 		fmt.Println("读取配置文件出错，请检查配置文件是否存在，运行终止！")
