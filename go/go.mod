@@ -6,9 +6,11 @@ require (
 	github.com/gavv/httpexpect/v2 v2.15.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/google/uuid v1.1.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
 	github.com/volcengine/ve-tos-golang-sdk/v2 v2.6.1
+	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
 )
 
 require (
