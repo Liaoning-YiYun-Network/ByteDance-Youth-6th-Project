@@ -18,9 +18,11 @@ create table user
 create table video
 (
     id             int auto_increment,
-    author_id      int           not null,
+    title          varchar(64)   not null,
+    user_id        int           not null,
     play_url       varchar(128)  not null,
     cover_url      varchar(128)  not null,
+    create_time    datetime      not null,
     favorite_count int default 0 not null,
     comment_count  int default 0 not null,
     comment_db     varchar(128)  not null,
