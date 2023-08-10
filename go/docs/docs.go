@@ -16,6 +16,30 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/douyin/feed": {
+            "get": {
+                "description": "这个接口，在用户刚进入抖音之后就会被调用，并将视频以及作者的信息推送给用户",
+                "tags": [
+                    "视频相关接口"
+                ],
+                "summary": "获取视频流",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间",
+                        "name": "LatestTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "该参数只有在用户登录状态下进行设置",
+                        "name": "Token",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/swaggereget": {
             "get": {
                 "description": "GET请求的例子描述",
