@@ -29,18 +29,20 @@ func InitBasePlatformRouter(r *gin.Engine) {
 	// public directory is used to serve static resources
 	r.Static("/static", "./public")
 
-	// ===========================swagger文档路由===================================
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	//=============================================================================
-
 	apiRouter := r.Group("/douyin")
 
-	// ============================swagger文档创建测试===============================
-	//get请求
-	apiRouter.GET("/swaggereget/", controller2.Swaggerget)
-	//post请求
-	apiRouter.GET("/swaggerpost/", controller2.Swaggerpost)
-	// ============================================================================
+	if viper.GetString("server.mode") != "release" {
+		// ===========================swagger文档路由===================================
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+		//=============================================================================
+
+		// ============================swagger文档创建测试===============================
+		//get请求
+		apiRouter.GET("/swaggereget/", controller2.Swaggerget)
+		//post请求
+		apiRouter.GET("/swaggerpost/", controller2.Swaggerpost)
+		// ============================================================================
+	}
 
 	// basic apis
 	apiRouter.GET("/feed/", controller2.Feed)

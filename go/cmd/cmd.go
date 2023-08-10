@@ -3,9 +3,11 @@ package cmd
 import (
 	"SkyLine/config"
 	"SkyLine/dao"
+	"SkyLine/data"
 	"SkyLine/router"
 	"SkyLine/service"
 	"fmt"
+	"time"
 )
 
 // Start 项目启动初始化各种配置
@@ -39,6 +41,20 @@ func Start() {
 		panic(err)
 	}
 	fmt.Println("初始化TOS成功")
+
+	go func() {
+		//每隔一段时间清理TempSQLiteConnects中所有的连接
+		for {
+			time.Sleep(time.Minute * 2)
+			for k, v := range data.TempSQLiteConnects {
+				err := v.Close()
+				if err != nil {
+					fmt.Printf("关闭SQLite数据库连接时发生错误：%s\n", err)
+				}
+				delete(data.TempSQLiteConnects, k)
+			}
+		}
+	}()
 
 	//将初始化路由放入最后，否则初始化路由后面的代码都不会执行
 	//初始化路由
