@@ -4,6 +4,22 @@ info:
   title: 简易版抖音
   version: 0.0.1
 paths:
+  /douyin/feed:
+    get:
+      description: 这个接口，在用户刚进入抖音之后就会被调用，并将视频以及作者的信息推送给用户
+      parameters:
+      - description: 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
+        in: query
+        name: LatestTime
+        type: string
+      - description: 该参数只有在用户登录状态下进行设置
+        in: query
+        name: Token
+        type: string
+      responses: {}
+      summary: 获取视频流
+      tags:
+      - 视频相关接口
   /swaggereget:
     get:
       description: GET请求的例子描述

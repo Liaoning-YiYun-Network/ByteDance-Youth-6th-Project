@@ -1,15 +1,14 @@
 package entity
 
-type VideoRequest struct {
+type FeedRequest struct {
 	LatestTime *string `json:"latest_time,omitempty"` // 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
 	Token      *string `json:"token,omitempty"`       // 用户登录状态下设置
 }
 
-type VideoResponse struct {
-	NextTime   *int64        `json:"next_time"`   // 本次返回的视频中，发布最早的时间，作为下次请求时的latest_time
-	StatusCode int64         `json:"status_code"` // 状态码，0-成功，其他值-失败
-	StatusMsg  *string       `json:"status_msg"`  // 返回状态描述
-	VideoList  []DouyinVideo `json:"video_list"`  // 视频列表
+type FeedResponse struct {
+	NextTime  int64 `json:"next_time"` // 本次返回的视频中，发布最早的时间，作为下次请求时的latest_time
+	Response  Response
+	VideoList []DouyinVideo `json:"video_list"` // 视频列表
 }
 
 // Video
