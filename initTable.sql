@@ -31,3 +31,19 @@ CREATE TABLE `video`
     `comment_db`     varchar(128)                                                  NOT NULL COMMENT '评论存储文件名',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+#用户详情表
+CREATE TABLE `userdetail`
+(
+    `userid`           int       NOT NULL COMMENT '用户id',
+    `name`             varchar(128) NOT NULL COMMENT '用户名称',
+    `avatar`           varchar(255) DEFAULT NULL COMMENT '用户头像',
+    `background_image` varchar(255) DEFAULT NULL COMMENT '用户个人页顶部大图',
+    `signature`        varchar(255) DEFAULT NULL COMMENT '个人简介',
+    `favorite_count`   int       DEFAULT NULL COMMENT '喜欢数',
+    `follow_count`     int       DEFAULT NULL COMMENT '关注总数',
+    `follower_count`   int       DEFAULT NULL COMMENT '粉丝总数',
+    `total_favorited`  varchar(255) DEFAULT NULL COMMENT '获赞数量',
+    `work_count`       int       DEFAULT NULL COMMENT '作品数',
+    PRIMARY KEY (`userid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
