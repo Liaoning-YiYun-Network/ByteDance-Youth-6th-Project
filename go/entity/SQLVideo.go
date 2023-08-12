@@ -4,9 +4,9 @@ import "time"
 
 type SQLVideo struct {
 	VideoId       int64      `gorm:"column:id;primary_key"` // 视频唯一标识
-	Author        UserDetail // 视频作者信息
+	UserDetail    UserDetail `gorm:"foreignKey:AuthorId"`   // 视频作者信息
 	Title         string     `gorm:"column:title"`          // 视频标题
-	AuthorId      int64      `gorm:"column:user_id"`        //作者id
+	AuthorId      int64      `gorm:"column:userid"`         //作者id
 	PlayUrl       string     `gorm:"column:play_url"`       // 视频播放地址
 	CoverUrl      string     `gorm:"column:cover_url"`      // 视频封面地址
 	CreateTime    *time.Time `gorm:"column:create_time"`    //创建时间

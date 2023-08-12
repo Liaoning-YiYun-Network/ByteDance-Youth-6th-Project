@@ -26,10 +26,11 @@ func Feed(c *gin.Context) {
 	feedRequest := &entity.FeedRequest{nil, nil}
 	video, err := service.SelectVideo(feedRequest)
 	if err != nil {
-		fmt.Println("视频查询查询出错")
-		fmt.Println(err)
+		fmt.Printf("视频获取出错:%v\n", err)
 	}
+	//将获取的video输出，方便测试
 	fmt.Printf("%#v", video)
+	//待根据业务逻辑，将查询到的东西返回前端
 	c.JSON(http.StatusOK, entity.FeedResponse{
 		Response:  entity.Response{StatusCode: 0, StatusMsg: "Nothing"},
 		VideoList: data.Videos,
