@@ -63,3 +63,42 @@ func CloseRedis() {
 	//关闭数据库连接
 	RedisSession.Close()
 }
+
+// SetRedis 向Redis中存入数据
+//
+// 参数：key string, value string
+//
+// 返回值：err
+func SetRedis(key string, value string) (err error) {
+	err = RedisSession.Set(key, value, 0).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetRedis 从Redis中获取数据
+//
+// 参数：key string
+//
+// 返回值：value string, err
+func GetRedis(key string) (value string, err error) {
+	value, err = RedisSession.Get(key).Result()
+	if err != nil {
+		return "", err
+	}
+	return value, nil
+}
+
+// DelRedis 从Redis中删除数据
+//
+// 参数：key string
+//
+// 返回值：err
+func DelRedis(key string) (err error) {
+	err = RedisSession.Del(key).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
