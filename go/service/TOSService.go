@@ -24,15 +24,16 @@ const AVATAR TOSFileType = 3
 // BACKGROUND 背景
 const BACKGROUND TOSFileType = 4
 
-var AccessKey = viper.GetString("tos.accessKey")
-var SecretKey = viper.GetString("tos.secretKey")
-var BucketName = viper.GetString("tos.bucketName")
+var BucketName string
 
 // client TOS客户端
 var client *tos.ClientV2
 
 // InitTOS 初始化TOS
 func InitTOS() error {
+	var AccessKey = viper.GetString("tos.accessKey")
+	var SecretKey = viper.GetString("tos.secretKey")
+	BucketName = viper.GetString("tos.bucketName")
 	var endpoint string
 	if viper.GetBool("tos.useInner") {
 		endpoint = viper.GetString("tos.endpoint-inside")
