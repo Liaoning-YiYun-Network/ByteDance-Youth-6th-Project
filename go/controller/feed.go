@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"SkyLine/data"
 	"SkyLine/entity"
 	"SkyLine/service"
 	"fmt"
@@ -27,13 +26,45 @@ func Feed(c *gin.Context) {
 	video, err := service.SelectVideo(feedRequest)
 	if err != nil {
 		fmt.Printf("视频获取出错:%v\n", err)
+		c.JSON(http.StatusInternalServerError, entity.FeedResponse{
+			Response:  entity.Response{StatusCode: 500, StatusMsg: "获取h视频出现错误"},
+			VideoList: nil,
+			NextTime:  time.Now().Unix(),
+		})
 	}
 	//将获取的video输出，方便测试
-	fmt.Printf("%#v", video)
+	//fmt.Printf("%#v", video)
+	douyinVideos := make([]entity.DouyinVideo, 30)
+	for i := range video {
+		author := entity.Author{
+			Avatar:          video[i].UserDetail.Avatar,
+			BackgroundImage: video[i].UserDetail.BackgroundImage,
+			FavoriteCount:   video[i].UserDetail.FavoriteCount,
+			FollowCount:     video[i].UserDetail.FollowCount,
+			FollowerCount:   video[i].UserDetail.FollowerCount,
+			ID:              video[i].UserDetail.ID,
+			IsFollow:        video[i].UserDetail.IsFollow,
+			Name:            video[i].UserDetail.Name,
+			Signature:       video[i].UserDetail.Signature,
+			TotalFavorited:  video[i].UserDetail.TotalFavorited,
+			WorkCount:       video[i].UserDetail.WorkCount,
+		}
+		douyinVideo := &entity.DouyinVideo{
+			Author:        author,
+			CommentCount:  video[i].CommentCount,
+			CoverURL:      video[i].CoverUrl,
+			FavoriteCount: video[i].FavoriteCount,
+			ID:            video[i].VideoId,
+			IsFavorite:    video[i].IsFollow,
+			PlayURL:       video[i].PlayUrl,
+			Title:         video[i].Title,
+		}
+		douyinVideos[i] = *douyinVideo
+	}
 	//待根据业务逻辑，将查询到的东西返回前端
 	c.JSON(http.StatusOK, entity.FeedResponse{
 		Response:  entity.Response{StatusCode: 0, StatusMsg: "Nothing"},
-		VideoList: data.Videos,
+		VideoList: douyinVideos,
 		NextTime:  time.Now().Unix(),
 	})
 }
