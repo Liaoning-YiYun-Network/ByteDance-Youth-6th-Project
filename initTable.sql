@@ -7,7 +7,7 @@ CREATE TABLE user
     username varchar(16)  NOT NULL COMMENT '用户名',
     password varchar(128) NOT NULL COMMENT '密码',
     state    int DEFAULT '1' COMMENT '用户状态（1-启用   0-封禁）',
-    PRIMARY KEY (`userid`)
+    PRIMARY KEY (userid)
 );
 
 #视频数据库表
