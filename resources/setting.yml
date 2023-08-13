@@ -2,11 +2,16 @@ server: #项目配置
   port: 9090
   mode: debug #debug|release
 db: #数据库配置
-  url: 101.126.39.202
-  userName: skyline
-  password: yxFR23SKYLINE
+#  url: 101.126.39.202
+#  userName: skyline
+#  password: yxFR23SKYLINE
+#  dbname: skyline
+#  port: 39284
+  url: 127.0.0.1
+  userName: root
+  password: root
   dbname: skyline
-  port: 39284
+  port: 3306
 redis: #redis配置
   url: 127.0.0.1
   userName:
@@ -14,7 +19,7 @@ redis: #redis配置
   dbname: 0
   port: 6379
 tos:
-  endpoint-outside: https://tos-cn-beijing.volces.com
+  endpoint-outside: https://tos.eyunnet.com
   endpoint-inside: https://tos-cn-beijing.ivolces.com
   useInner: false #此处默认使用外网地址，如果需要使用内网地址，请将此处改为true（请确保你在使用内网地址时，运行环境为火山引擎且地域与下方配置相同）
   region: cn-beijing
