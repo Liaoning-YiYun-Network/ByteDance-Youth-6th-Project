@@ -2,11 +2,11 @@ server: #项目配置
   port: 9090
   mode: debug #debug|release
 db: #数据库配置
-  url: 127.0.0.1
-  userName: root
-  password: root
+  url: 101.126.39.202
+  userName: skyline
+  password: yxFR23SKYLINE
   dbname: skyline
-  port: 3306
+  port: 39284
 redis: #redis配置
   url: 127.0.0.1
   userName:
