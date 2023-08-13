@@ -12,6 +12,9 @@ type UserDetail struct {
 	TotalFavorited  string `gorm:"column:total_favorited"`  // 获赞数量
 	WorkCount       int64  `gorm:"column:work_count"`       // 作品数
 	IsFollow        bool   `gorm:"-"`                       // true-已关注，false-未关注
+	FollowDB        string `gorm:"column:follow_db"`
+	FollowerDB      string `gorm:"column:follower_db"`
+	FavoriteDB      string `gorm:"column:favorite_db"`
 }
 
 // 定义Author对应的数据库表名

@@ -34,7 +34,7 @@ func Feed(c *gin.Context) {
 	}
 	//将获取的video输出，方便测试
 	//fmt.Printf("%#v", video)
-	douyinVideos := make([]entity.DouyinVideo, 30)
+	douyinVideos := make([]entity.DouyinVideo, len(video))
 	for i := range video {
 		author := entity.Author{
 			Avatar:          video[i].UserDetail.Avatar,
@@ -63,8 +63,11 @@ func Feed(c *gin.Context) {
 	}
 	//待根据业务逻辑，将查询到的东西返回前端
 	c.JSON(http.StatusOK, entity.FeedResponse{
-		Response:  entity.Response{StatusCode: 0, StatusMsg: "Nothing"},
+		Response: entity.Response{StatusCode: 0, StatusMsg: "Nothing"},
+		//真实数据
 		VideoList: douyinVideos,
-		NextTime:  time.Now().Unix(),
+		//为方便测试伪造的数据
+		//VideoList: data.Videos,
+		NextTime: time.Now().Unix(),
 	})
 }
