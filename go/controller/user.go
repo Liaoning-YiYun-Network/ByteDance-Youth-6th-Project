@@ -1,26 +1,20 @@
 package controller
 
 import (
+	"SkyLine/dao"
+	"SkyLine/data"
 	"SkyLine/entity"
+	"SkyLine/service"
+	"SkyLine/util"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"sync/atomic"
+	"strconv"
 )
 
-// usersLoginInfo use map to store user info, and key is username+password for demo
-// user data will be cleared every time the server starts
-// test data: username=zhanglei, password=douyin
-var usersLoginInfo = map[string]entity.User{
-	"zhangleidouyin": {
-		Id:            1,
-		Name:          "zhanglei",
-		FollowCount:   10,
-		FollowerCount: 5,
-		IsFollow:      true,
-	},
-}
+var usersLoginInfo map[string]entity.User
 
-var userIdSequence = int64(1)
+var userIdSequence = int64(-1)
 
 type UserLoginResponse struct {
 	entity.Response
@@ -34,60 +28,176 @@ type UserResponse struct {
 }
 
 func Register(c *gin.Context) {
+	if userIdSequence == -1 {
+		users, err := service.GetSQLUserList()
+		if err != nil {
+			fmt.Println("获取用户列表失败，运行终止！")
+			panic(err)
+		}
+		fmt.Println("获取用户列表成功")
+		usersLoginInfo = make(map[string]entity.User)
+		userIdSequence = int64(len(users) + 1)
+	}
 	username := c.Query("username")
 	password := c.Query("password")
 
-	token := username + password
-
-	if _, exist := usersLoginInfo[token]; exist {
+	//从数据库中查询用户是否存在
+	user, _ := service.GetSQLUserByName(username)
+	if user.UserName != "" {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: entity.Response{StatusCode: 1, StatusMsg: "User already exist"},
 		})
 	} else {
-		atomic.AddInt64(&userIdSequence, 1)
-		newUser := entity.User{
-			Id:   userIdSequence,
-			Name: username,
-		}
-		usersLoginInfo[token] = newUser
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: entity.Response{StatusCode: 0},
+		str := util.EncryptWithMD5(password)
+		sqlUser := entity.SQLUser{
 			UserId:   userIdSequence,
-			Token:    username + password,
+			UserName: username,
+			Password: str,
+			State:    1,
+		}
+		//将用户信息存入数据库
+		err := service.CreateSQLUser(&sqlUser)
+		if err != nil {
+			c.JSON(http.StatusOK, UserLoginResponse{
+				Response: entity.Response{StatusCode: 1, StatusMsg: "Register failed"},
+			})
+			fmt.Println("Register failed due to database error:", err)
+			return
+		}
+		token, err := util.GenerateToken(sqlUser)
+		if err != nil {
+			token = username + password
+		}
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: entity.Response{StatusCode: 0, StatusMsg: "Register success"},
+			UserId:   userIdSequence,
+			Token:    token,
 		})
+		err = dao.SetRedisWithExpire(token, username, 60)
+		if err != nil {
+			fmt.Println("Register success, but Redis occurred an error:", err)
+		}
+		followDBName, err := dao.CreateDB(dao.FOLLOWS, int(userIdSequence))
+		if err != nil {
+			fmt.Println("Register success, but create followDB occurred an error:", err)
+		}
+		followerDBName, err := dao.CreateDB(dao.FOLLOWERS, int(userIdSequence))
+		if err != nil {
+			fmt.Println("Register success, but create followerDB occurred an error:", err)
+		}
+		favoriteDBName, err := dao.CreateDB(dao.FAVORITES, int(userIdSequence))
+		if err != nil {
+			fmt.Println("Register success, but create favoriteDB occurred an error:", err)
+		}
+		var userDetail = entity.UserDetail{
+			ID:              userIdSequence,
+			Name:            username,
+			Avatar:          data.DefaultAvatar,
+			BackgroundImage: data.DefaultBackgroundImage,
+			Signature:       data.DefaultSignature,
+			FollowDB:        followDBName,
+			FollowerDB:      followerDBName,
+			FavoriteDB:      favoriteDBName,
+		}
+		err = service.CreateUserDetail(&userDetail)
+		if err != nil {
+			fmt.Println("Register success, but UserDetail occurred an error:", err)
+		}
+		userIdSequence++
 	}
 }
 
 func Login(c *gin.Context) {
+	if userIdSequence == -1 {
+		users, err := service.GetSQLUserList()
+		if err != nil {
+			fmt.Println("获取用户列表失败，运行终止！")
+			panic(err)
+		}
+		fmt.Println("获取用户列表成功")
+		usersLoginInfo = make(map[string]entity.User)
+		userIdSequence = int64(len(users) + 1)
+	}
 	username := c.Query("username")
 	password := c.Query("password")
-
-	token := username + password
-
-	if user, exist := usersLoginInfo[token]; exist {
+	encryptedKey := util.EncryptWithMD5(password)
+	user, err := service.GetSQLUserByName(username)
+	if err != nil {
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: entity.Response{StatusCode: 0},
-			UserId:   user.Id,
+			Response: entity.Response{StatusCode: 1, StatusMsg: "Login Failed"},
+		})
+		return
+	}
+	if user.Password != encryptedKey {
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: entity.Response{StatusCode: 1, StatusMsg: "Wrong Password!"},
+			UserId:   user.UserId,
+		})
+		return
+	}
+	token, err := util.GenerateToken(*user)
+	if err != nil {
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: entity.Response{StatusCode: 1, StatusMsg: "Login Failed"},
+			UserId:   user.UserId,
+		})
+		return
+	}
+	err = dao.SetRedisWithExpire(token, username, 240)
+	if err != nil {
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: entity.Response{StatusCode: 1, StatusMsg: "Login Failed"},
+			UserId:   user.UserId,
 			Token:    token,
 		})
-	} else {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: entity.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
-		})
+		return
 	}
+	c.JSON(http.StatusOK, UserLoginResponse{
+		Response: entity.Response{StatusCode: 0, StatusMsg: "Login Success"},
+		UserId:   user.UserId,
+		Token:    token,
+	})
 }
 
 func UserInfo(c *gin.Context) {
 	token := c.Query("token")
-
-	if user, exist := usersLoginInfo[token]; exist {
-		c.JSON(http.StatusOK, UserResponse{
-			Response: entity.Response{StatusCode: 0},
-			User:     user,
-		})
+	username, err := dao.GetRedis(token)
+	if err != nil {
+		id, _ := strconv.Atoi(c.Query("user_id"))
+		detail, err := service.GetUserDetailById(id)
+		if err != nil || detail.Name == "" {
+			c.JSON(http.StatusOK, UserResponse{
+				Response: entity.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+			})
+			return
+		} else {
+			c.JSON(http.StatusOK, UserResponse{
+				Response: entity.Response{StatusCode: 0, StatusMsg: "Nothing"},
+				User: entity.User{
+					Id:            detail.ID,
+					Name:          detail.Name,
+					FollowCount:   detail.FollowCount,
+					FollowerCount: detail.FollowerCount,
+				},
+			})
+			return
+		}
 	} else {
+		detail, err := service.GetUserDetailByName(username)
+		if err != nil {
+			c.JSON(http.StatusOK, UserResponse{
+				Response: entity.Response{StatusCode: 1, StatusMsg: "Get UserInfo Failed"},
+			})
+			return
+		}
 		c.JSON(http.StatusOK, UserResponse{
-			Response: entity.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+			Response: entity.Response{StatusCode: 0, StatusMsg: "Nothing"},
+			User: entity.User{
+				Id:            detail.ID,
+				Name:          detail.Name,
+				FollowCount:   detail.FollowCount,
+				FollowerCount: detail.FollowerCount,
+			},
 		})
 	}
 }

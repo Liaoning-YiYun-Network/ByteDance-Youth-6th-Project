@@ -21,7 +21,7 @@ func CreateSQLUser(user *entity.SQLUser) error {
 // return: 用户实体/错误
 func GetSQLUserById(id int) (*entity.SQLUser, error) {
 	user := new(entity.SQLUser)
-	err := dao.SqlSession.Where("userid = ?", id).First(user).Error
+	err := dao.SqlSession.Where("`userid` = ?", id).First(user).Error
 	return user, err
 }
 
@@ -32,7 +32,7 @@ func GetSQLUserById(id int) (*entity.SQLUser, error) {
 // return: 用户实体/错误
 func GetSQLUserByName(name string) (*entity.SQLUser, error) {
 	user := new(entity.SQLUser)
-	err := dao.SqlSession.Where("username = ?", name).First(user).Error
+	err := dao.SqlSession.Where("`username` = ?", name).First(user).Error
 	return user, err
 }
 

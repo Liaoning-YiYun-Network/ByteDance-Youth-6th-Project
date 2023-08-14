@@ -1,6 +1,7 @@
 package config
 
 import (
+	"SkyLine/data"
 	"fmt"
 	"github.com/spf13/viper"
 )
@@ -17,4 +18,7 @@ func InitConfig() {
 		panic(err)
 	}
 	fmt.Println("配置文件读取成功！")
+	data.DefaultSignature = viper.GetString("default.signature")
+	data.DefaultAvatar = viper.GetString("default.avatar")
+	data.DefaultBackgroundImage = viper.GetString("default.background_image")
 }

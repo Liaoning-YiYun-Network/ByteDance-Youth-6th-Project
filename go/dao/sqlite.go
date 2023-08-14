@@ -31,7 +31,7 @@ func CreateDB(dbType DBType, id int) (string, error) {
 	case FOLLOWS:
 		//从resources/default_dbs目录下复制follows.sqlite到dbs目录下，并重命名为随机UUID
 		namePrefix = string(FOLLOWS) + "-" + strconv.Itoa(id) + "-" + randomStr + ".sqlite"
-		err := util.CopyFile("./resources/default_dbs/follows.sqlite", "./dbs/"+namePrefix)
+		err := util.CopyFile("./resources/default_dbs/follows.sqlite", "./dbs/follows/"+namePrefix)
 		if err != nil {
 			return "", fmt.Errorf("尝试创建SQLite数据库时发生错误：%s", err)
 		}
@@ -39,7 +39,7 @@ func CreateDB(dbType DBType, id int) (string, error) {
 	case FOLLOWERS:
 		//从resources/default_dbs目录下复制followers.sqlite到dbs目录下，并重命名为随机UUID
 		namePrefix = string(FOLLOWERS) + "-" + strconv.Itoa(id) + "-" + randomStr + ".sqlite"
-		err := util.CopyFile("./resources/default_dbs/followers.sqlite", "./dbs/"+namePrefix)
+		err := util.CopyFile("./resources/default_dbs/followers.sqlite", "./dbs/followers/"+namePrefix)
 		if err != nil {
 			return "", fmt.Errorf("尝试创建SQLite数据库时发生错误：%s", err)
 		}
@@ -47,7 +47,7 @@ func CreateDB(dbType DBType, id int) (string, error) {
 	case COMMENTS:
 		//从resources/default_dbs目录下复制comments.sqlite到dbs目录下，并重命名为随机UUID
 		namePrefix = string(COMMENTS) + "-" + strconv.Itoa(id) + "-" + randomStr + ".sqlite"
-		err := util.CopyFile("./resources/default_dbs/comments.sqlite", "./dbs/"+namePrefix)
+		err := util.CopyFile("./resources/default_dbs/comments.sqlite", "./dbs/comments/"+namePrefix)
 		if err != nil {
 			return "", fmt.Errorf("尝试创建SQLite数据库时发生错误：%s", err)
 		}
@@ -55,7 +55,7 @@ func CreateDB(dbType DBType, id int) (string, error) {
 	case FAVORITES:
 		//从resources/default_dbs目录下复制favorites.sqlite到dbs目录下，并重命名为随机UUID
 		namePrefix = string(FAVORITES) + "-" + strconv.Itoa(id) + "-" + randomStr + ".sqlite"
-		err := util.CopyFile("./resources/default_dbs/favorites.sqlite", "./dbs/"+namePrefix)
+		err := util.CopyFile("./resources/default_dbs/favorites.sqlite", "./dbs/favorites/"+namePrefix)
 		if err != nil {
 			return "", fmt.Errorf("尝试创建SQLite数据库时发生错误：%s", err)
 		}

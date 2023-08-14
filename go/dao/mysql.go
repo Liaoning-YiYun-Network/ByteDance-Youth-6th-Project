@@ -33,7 +33,6 @@ func InitMySql() (err error) {
 	var c MySQLConfig
 	//获取yaml配置参数
 	conf := c.getConf()
-	fmt.Printf("数据库配置文件参数：%#v\n", conf)
 	//将yaml配置参数拼接成连接数据库的url
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		conf.UserName,

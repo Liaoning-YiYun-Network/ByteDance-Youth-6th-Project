@@ -7,9 +7,20 @@ import (
 
 // CopyFile 将文件拷贝到指定目录
 func CopyFile(src, dst string) error {
-	exist := isDirExist(dst)
+	//匹配dst最后一个/，并移除其最后一个/后的内容
+	//例如：将./dbs/follows/1-1-1-1-1-1-1-1-1-1-1-1-1-1-1.sqlite
+	//转换为./dbs/follows/
+	var parentDir string
+	for i := len(dst) - 1; i >= 0; i-- {
+		if dst[i] == '/' {
+			parentDir = dst[0 : i+1]
+			break
+		}
+	}
+	// 判断目标目录是否存在，不存在则创建
+	exist := isDirExist(parentDir)
 	if !exist {
-		err := os.MkdirAll(dst, os.ModePerm)
+		err := os.MkdirAll(parentDir, os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -43,6 +54,11 @@ func CopyFile(src, dst string) error {
 		}
 	}
 	return nil
+}
+
+// RenameFile 将文件重命名
+func RenameFile(src, dst string) error {
+	return os.Rename(src, dst)
 }
 
 // isDirExist 判断目录是否存在

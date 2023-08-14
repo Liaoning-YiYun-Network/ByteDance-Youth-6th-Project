@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -32,6 +33,14 @@ func EncryptWithAES(key []byte, data string) (string, error) {
 	iv := make([]byte, aes.BlockSize)
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return "", err
+	}
+
+	// 填充数据
+	blockSize := block.BlockSize()
+	if len(plaintext)%blockSize != 0 {
+		padding := blockSize - len(plaintext)%blockSize
+		padText := []byte{byte(padding)}
+		plaintext = append(plaintext, bytes.Repeat(padText, padding)...)
 	}
 
 	// 使用CBC模式加密

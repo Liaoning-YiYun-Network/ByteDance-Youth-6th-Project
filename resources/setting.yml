@@ -21,3 +21,7 @@ tos:
   bucketName: youth6th-test
   accessKey: AKLTNjcxMjY1M2FiMDQ2NGY2ZjliYjExMjI4MGNlYjMzZTI
   secretKey: T0RKbU5tRXpaV1E1TkdOaE5EZ3dORGhtWTJObFl6UmxZbU5rTlRrNVpERQ==
+default:
+  avatar: https://tos.eyunnet.com/avatars%2Fdefault.png
+  background_image: https://tos.eyunnet.com/backgrounds%2Fdefault.png
+  signature: 这个人很懒没有写简介QAQ
