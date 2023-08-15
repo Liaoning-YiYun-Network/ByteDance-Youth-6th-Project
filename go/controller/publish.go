@@ -51,14 +51,19 @@ func Publish(c *gin.Context) {
 	})
 }
 
-// PublishList all users have same publish video list
+// @Summary  获取某一用户的所发布的搜游视频
+// @Description  这个接口，会根据用户id去查询该用户发布的所有的视频
+// @Tags         视频相关接口
+// @Param        userid  query  int64  ture  "用户的userid"
+// @Param        Token  query  string  ture  "该参数只有在用户登录状态下进行设置"
+// @Router       /publish/list [get]
 func PublishList(c *gin.Context) {
 	publishListRequest := &entity.PublishListRequest{c.GetInt64("user_id"), c.GetString("token")}
 	video, err := service.SelectVideoListByUserId(publishListRequest)
 	if err != nil {
 		fmt.Printf("视频获取出错:%v\n", err)
 		c.JSON(http.StatusInternalServerError, entity.FeedResponse{
-			Response:  entity.Response{StatusCode: 500, StatusMsg: "获取视频列表出现错误"},
+			Response:  entity.Response{StatusCode: 1, StatusMsg: "获取视频列表出现错误"},
 			VideoList: nil,
 			NextTime:  time.Now().Unix(),
 		})

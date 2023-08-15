@@ -31,6 +31,30 @@
                 "responses": {}
             }
         },
+        "/publish/list": {
+            "get": {
+                "description": "这个接口，会根据用户id去查询该用户发布的所有的视频",
+                "tags": [
+                    "视频相关接口"
+                ],
+                "summary": "获取某一用户的所发布的搜游视频",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户的userid",
+                        "name": "userid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "该参数只有在用户登录状态下进行设置",
+                        "name": "Token",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/swaggereget": {
             "get": {
                 "description": "GET请求的例子描述",
