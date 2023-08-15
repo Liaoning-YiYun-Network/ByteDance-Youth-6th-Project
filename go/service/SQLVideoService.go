@@ -36,8 +36,39 @@ func SelectVideo(feedRequest *entity.FeedRequest) ([]entity.SQLVideo, error) {
 		Order("create_time DESC").
 		Limit(30).
 		Find(&video).Error
+	if err != nil {
+		return nil, err
+	}
 	for i := range video {
 		err = dao.SqlSession.Where("userid = ?", video[i].AuthorId).Find(&video[i].UserDetail).Error
+		if err != nil {
+			return nil, err
+		}
+	}
+	return video, err
+}
+
+// SelectVideo 单个用户所发布视频的查询
+//
+// # PublishListRequest
+//
+// return: SQLVideo,错误
+func SelectVideoListByUserId(publishListRequest *entity.PublishListRequest) ([]entity.SQLVideo, error) {
+	var video []entity.SQLVideo
+	err := dao.SqlSession.
+		Order("create_time DESC").
+		Where("userid = ?", publishListRequest.UserId).
+		Find(&video).Error
+	if err != nil {
+		return nil, err
+	}
+	author := entity.UserDetail{}
+	err = dao.SqlSession.Where("userid = ?", publishListRequest.UserId).Find(&author).Error
+	if err != nil {
+		return nil, err
+	}
+	for i := range video {
+		video[i].UserDetail = author
 	}
 	return video, err
 }
