@@ -27,7 +27,7 @@ func Feed(c *gin.Context) {
 	if err != nil {
 		fmt.Printf("视频获取出错:%v\n", err)
 		c.JSON(http.StatusInternalServerError, entity.FeedResponse{
-			Response:  entity.Response{StatusCode: 500, StatusMsg: "获取h视频出现错误"},
+			Response:  entity.Response{StatusCode: 1, StatusMsg: "获取视频出现错误"},
 			VideoList: nil,
 			NextTime:  time.Now().Unix(),
 		})
@@ -63,7 +63,7 @@ func Feed(c *gin.Context) {
 	}
 	//待根据业务逻辑，将查询到的东西返回前端
 	c.JSON(http.StatusOK, entity.FeedResponse{
-		Response: entity.Response{StatusCode: 0, StatusMsg: "Nothing"},
+		Response: entity.Response{StatusCode: 0, StatusMsg: "获取视频成功"},
 		//真实数据
 		VideoList: douyinVideos,
 		//为方便测试伪造的数据

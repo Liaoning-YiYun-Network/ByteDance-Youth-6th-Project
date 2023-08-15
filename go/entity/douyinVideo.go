@@ -11,6 +11,11 @@ type FeedResponse struct {
 	VideoList []DouyinVideo `json:"video_list"` // 视频列表
 }
 
+type PublishListRequest struct {
+	UserId int64  `json:"user_id"` // 用户id
+	Token  string `json:"token"`   // 用户鉴权token
+}
+
 // Video
 type DouyinVideo struct {
 	Author        Author `json:"author"`         // 视频作者信息
