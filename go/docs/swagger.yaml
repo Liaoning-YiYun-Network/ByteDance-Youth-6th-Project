@@ -20,6 +20,22 @@ paths:
       summary: 获取视频流
       tags:
       - 视频相关接口
+  /publish/list:
+    get:
+      description: 这个接口，会根据用户id去查询该用户发布的所有的视频
+      parameters:
+      - description: 用户的userid
+        in: query
+        name: userid
+        type: integer
+      - description: 该参数只有在用户登录状态下进行设置
+        in: query
+        name: Token
+        type: string
+      responses: {}
+      summary: 获取某一用户的所发布的搜游视频
+      tags:
+      - 视频相关接口
   /swaggereget:
     get:
       description: GET请求的例子描述
