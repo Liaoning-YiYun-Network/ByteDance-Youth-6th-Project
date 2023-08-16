@@ -3,11 +3,16 @@ package controller
 import (
 	"SkyLine/entity"
 	"SkyLine/service"
+	"SkyLine/util"
+	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"io/ioutil"
+	ffmpeg "github.com/u2takey/ffmpeg-go"
+	"image"
+	"image/jpeg"
+	"io"
 	"net/http"
-	"path/filepath"
+	"os"
 	"time"
 )
 
@@ -20,10 +25,13 @@ type VideoListResponse struct {
 func Publish(c *gin.Context) {
 	token := c.PostForm("token")
 
-	if _, exist := usersLoginInfo[token]; !exist {
-		c.JSON(http.StatusOK, entity.Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
-		return
-	}
+	//	if _, exist := usersLoginInfo[token]; !exist {
+	//		c.JSON(http.StatusOK, entity.Response{
+	//StatusCode: 1,
+	//			StatusMsg:  "User doesn't exist",
+	//		})
+	//		return
+	//	}
 
 	data, err := c.FormFile("data")
 	if err != nil {
@@ -33,31 +41,99 @@ func Publish(c *gin.Context) {
 		})
 		return
 	}
-	fileName := filepath.Base(data.Filename)
-	user := usersLoginInfo[token]
-	finalName := fmt.Sprintf("%d_%s", user.Id, fileName)
-	saveFile := filepath.Join("./public/", finalName)
-	// 使用os.Stat函数检查文件是否存在
-	//_, err := os.Stat(saveFile)
-	//if err == nil {
-	//	fmt.Println("文件存在")
-	//} else if os.IsNotExist(err) {
-	//	fmt.Println("文件不存在")
-	//} else {
-	//	fmt.Println("发生了其他错误：", err)
-	//}
-	fileContent, err := ioutil.ReadFile(saveFile)
-	if err != nil {
-		fmt.Println("读取文件内容时发生错误：", err)
+	// 获取文件大小
+	fileSize := data.Size
+	// 设置文件大小限制，例如 500MB
+	maxFileSize := int64(500 * 1024 * 1024) // 500MB
+	if fileSize > maxFileSize {
+		c.JSON(http.StatusOK, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "File size exceeds the limit",
+		})
 		return
 	}
-	// 调用上传函数
-	err = service.UploadFile(fileName, fileContent, 2)
+	file, err := data.Open()
+	if err != nil {
+		c.JSON(http.StatusOK, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "Failed to open file",
+		})
+		return
+	}
+	defer file.Close()
+	fileContent, err := io.ReadAll(file)
+	if err != nil {
+		c.JSON(http.StatusOK, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "Failed to read file",
+		})
+		return
+	}
+	fileName := data.Filename
+	// 调用上传函数上传视频
+	//函数的第二个参数需要是 []byte 类型
+	err = service.UploadFile(fileName, fileContent, service.VIDEO)
 	if err != nil {
 		fmt.Println("上传文件时发生错误：", err)
+		// 处理错误
 	} else {
 		fmt.Println("文件上传成功！")
+		// 处理成功
 	}
+	//这块是怎么回事？
+	//token := c.Query("token")
+	//user, err := dao.GetRedis(token)
+	user := usersLoginInfo[token]
+	//id, _ := strconv.Atoi(c.Query("user_id"))
+	//这块是怎么回事？
+	// 调用UUID函数生成带横杠的UUID
+	videoUUID, err := util.UUID()
+	if err != nil {
+		fmt.Println("Error generating UUID:", err)
+		return
+	}
+	newVideoName := fmt.Sprintf("%d-%s-%s.mp4", user.Id, videoUUID, fileName) //产生问题了！！！
+	videoUrl := "https://tos.eyunnet.com/" + "videos/" + newVideoName
+	coverBytes, _ := ReadFrameAsJpeg(videoUrl)
+	// 调用上传函数上传视频封面
+
+	err = service.UploadFile(newVideoName, coverBytes, service.VIDEO_COVER)
+	if err != nil {
+		fmt.Println("上传文件时发生错误：", err)
+		c.JSON(http.StatusOK, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  newVideoName + " failed in uploading",
+		})
+		return
+	} else {
+		fmt.Println("文件上传成功！")
+		c.JSON(http.StatusOK, entity.Response{
+			StatusCode: 0,
+			StatusMsg:  newVideoName + " uploaded successfully",
+		})
+	}
+}
+
+// 截取视频封面
+func ReadFrameAsJpeg(filePath string) ([]byte, error) {
+	reader := bytes.NewBuffer(nil)
+	err := ffmpeg.Input(filePath).
+		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", 1)}).
+		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
+		WithOutput(reader, os.Stdout).
+		Run()
+	if err != nil {
+		return nil, err
+	}
+	img, _, err := image.Decode(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := new(bytes.Buffer)
+	jpeg.Encode(buf, img, nil)
+
+	return buf.Bytes(), err
 }
 
 // @Summary  获取某一用户的所发布的搜游视频
