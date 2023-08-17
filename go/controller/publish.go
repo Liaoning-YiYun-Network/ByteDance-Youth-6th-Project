@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -143,7 +144,15 @@ func ReadFrameAsJpeg(filePath string) ([]byte, error) {
 // @Param        Token  query  string  ture  "该参数只有在用户登录状态下进行设置"
 // @Router       /publish/list [get]
 func PublishList(c *gin.Context) {
-	publishListRequest := &entity.PublishListRequest{c.GetInt64("user_id"), c.GetString("token")}
+	userid, interr := strconv.ParseInt(c.Query("user_id"), 10, 64)
+	if interr != nil {
+		c.JSON(http.StatusInternalServerError, entity.FeedResponse{
+			Response:  entity.Response{StatusCode: 1, StatusMsg: "参数转换失败"},
+			VideoList: nil,
+			NextTime:  time.Now().Unix(),
+		})
+	}
+	publishListRequest := &entity.PublishListRequest{userid, c.Query("token")}
 	video, err := service.SelectVideoListByUserId(publishListRequest)
 	if err != nil {
 		fmt.Printf("视频获取出错:%v\n", err)
