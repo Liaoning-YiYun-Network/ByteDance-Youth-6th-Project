@@ -87,9 +87,7 @@ func Publish(c *gin.Context) {
 		})
 		return
 	}
-	//截取后面的.MP4  防止出现文件名为**.MP4.MP4
-	fileName = fileName[:len(fileName)-5]
-	newVideoName := fmt.Sprintf("%d-%s-%s.mp4", user.UserId, videoUUID, fileName)
+	newVideoName := fmt.Sprintf("%d-%s-%s", user.UserId, videoUUID, fileName)
 	// 调用上传函数上传视频
 	//函数的第二个参数需要是 []byte 类型
 	err = service.UploadFile(newVideoName, fileContent, service.VIDEO)
