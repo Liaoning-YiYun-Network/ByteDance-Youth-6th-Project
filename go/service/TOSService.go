@@ -88,3 +88,29 @@ func UploadFile(fileName string, fileContent []byte, fileType TOSFileType) error
 	fmt.Println("UploadFile: ", fileName, " Request ID: ", output.RequestID, " Status: ", output.StatusCode)
 	return err
 }
+
+// DeleteFile 删除文件
+// fileName 文件名
+// fileType 文件类型
+// 返回错误信息
+func DeleteFile(fileName string, fileType TOSFileType) error {
+	var pathPrefix string
+	switch fileType {
+	case VIDEO_COVER:
+		pathPrefix = "video_covers/"
+	case VIDEO:
+		pathPrefix = "videos/"
+	case AVATAR:
+		pathPrefix = "avatars/"
+	case BACKGROUND:
+		pathPrefix = "backgrounds/"
+	}
+	var key = pathPrefix + fileName
+	var ctx = context.Background()
+	output, err := client.DeleteObjectV2(ctx, &tos.DeleteObjectV2Input{
+		Bucket: BucketName,
+		Key:    key,
+	})
+	fmt.Println("DeleteFile: ", fileName, " Request ID: ", output.RequestID, " Status: ", output.StatusCode)
+	return err
+}

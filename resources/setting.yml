@@ -25,3 +25,5 @@ default:
   avatar: https://tos.eyunnet.com/avatars%2Fdefault.png
   background_image: https://tos.eyunnet.com/backgrounds%2Fdefault.png
   signature: 这个人很懒没有写简介QAQ
+  video:
+    title: 视频标题

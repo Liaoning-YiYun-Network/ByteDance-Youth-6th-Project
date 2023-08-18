@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SkyLine/dao"
 	"SkyLine/entity"
 	"SkyLine/service"
 	"SkyLine/util"
@@ -25,20 +26,27 @@ type VideoListResponse struct {
 // Publish check token then save upload file to public directory
 func Publish(c *gin.Context) {
 	token := c.PostForm("token")
-
-	//	if _, exist := usersLoginInfo[token]; !exist {
-	//		c.JSON(http.StatusOK, entity.Response{
-	//StatusCode: 1,
-	//			StatusMsg:  "User doesn't exist",
-	//		})
-	//		return
-	//	}
-
+	username, err := dao.GetRedis(token)
+	if err != nil {
+		c.JSON(http.StatusForbidden, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "token invalid or expired",
+		})
+		return
+	}
+	user, err := service.GetSQLUserByName(username)
+	if err != nil {
+		c.JSON(http.StatusForbidden, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "user not exist",
+		})
+		return
+	}
 	data, err := c.FormFile("data")
 	if err != nil {
-		c.JSON(http.StatusOK, entity.Response{
+		c.JSON(http.StatusInternalServerError, entity.Response{
 			StatusCode: 1,
-			StatusMsg:  err.Error(),
+			StatusMsg:  "Failed to get file",
 		})
 		return
 	}
@@ -47,7 +55,7 @@ func Publish(c *gin.Context) {
 	// 设置文件大小限制，例如 500MB
 	maxFileSize := int64(500 * 1024 * 1024) // 500MB
 	if fileSize > maxFileSize {
-		c.JSON(http.StatusOK, entity.Response{
+		c.JSON(http.StatusRequestEntityTooLarge, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "File size exceeds the limit",
 		})
@@ -55,7 +63,7 @@ func Publish(c *gin.Context) {
 	}
 	file, err := data.Open()
 	if err != nil {
-		c.JSON(http.StatusOK, entity.Response{
+		c.JSON(http.StatusInternalServerError, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "Failed to open file",
 		})
@@ -64,58 +72,76 @@ func Publish(c *gin.Context) {
 	defer file.Close()
 	fileContent, err := io.ReadAll(file)
 	if err != nil {
-		c.JSON(http.StatusOK, entity.Response{
+		c.JSON(http.StatusInternalServerError, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "Failed to read file",
 		})
 		return
 	}
 	fileName := data.Filename
-	// 调用上传函数上传视频
-	//函数的第二个参数需要是 []byte 类型
-	err = service.UploadFile(fileName, fileContent, service.VIDEO)
+	videoUUID, err := util.UUIDWithoutHyphen()
 	if err != nil {
-		fmt.Println("上传文件时发生错误：", err)
-		// 处理错误
-	} else {
-		fmt.Println("文件上传成功！")
-		// 处理成功
-	}
-	//这块是怎么回事？
-	//token := c.Query("token")
-	//user, err := dao.GetRedis(token)
-	user := usersLoginInfo[token]
-	//id, _ := strconv.Atoi(c.Query("user_id"))
-	//这块是怎么回事？
-	// 调用UUID函数生成带横杠的UUID
-	videoUUID, err := util.UUID()
-	if err != nil {
-		fmt.Println("Error generating UUID:", err)
+		c.JSON(http.StatusInternalServerError, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "Failed to process file name",
+		})
 		return
 	}
-	newVideoName := fmt.Sprintf("%d-%s-%s.mp4", user.Id, videoUUID, fileName) //产生问题了！！！
-	videoUrl := "https://tos.eyunnet.com/" + "videos/" + newVideoName
+	newVideoName := fmt.Sprintf("%d-%s-%s.mp4", user.UserId, videoUUID, fileName)
+	// 调用上传函数上传视频
+	//函数的第二个参数需要是 []byte 类型
+	err = service.UploadFile(newVideoName, fileContent, service.VIDEO)
+	if err != nil {
+		// 处理错误
+		c.JSON(http.StatusInternalServerError, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "Failed to upload video file",
+		})
+		return
+	}
+	videoUrl := "https://tos.eyunnet.com/videos/" + newVideoName
 	coverBytes, _ := ReadFrameAsJpeg(videoUrl)
+	coverName := fmt.Sprintf("%d-%s-%s.jpg", user.UserId, videoUUID, fileName)
 	// 调用上传函数上传视频封面
-
-	err = service.UploadFile(newVideoName, coverBytes, service.VIDEO_COVER)
+	err = service.UploadFile(coverName, coverBytes, service.VIDEO_COVER)
 	if err != nil {
 		fmt.Println("上传文件时发生错误：", err)
+		err := service.DeleteFile(newVideoName, service.VIDEO)
+		if err == nil {
+			fmt.Println("文件", newVideoName, "删除成功！")
+		}
 		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
-			StatusMsg:  newVideoName + " failed in uploading",
+			StatusMsg:  coverName + " failed in uploading",
 		})
 		return
 	} else {
-		fmt.Println("文件上传成功！")
+		fmt.Printf("文件%s上传成功！\n", newVideoName)
+	}
+	coverUrl := "https://tos.eyunnet.com/video_covers/" + coverName
+	err = service.CreateSQLVideo(&entity.SQLVideo{
+		AuthorId: user.UserId,
+		Title:    c.PostForm("title"),
+		PlayUrl:  videoUrl,
+		CoverUrl: coverUrl,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "Failed to save video info",
+		})
+		service.DeleteFile(newVideoName, service.VIDEO)
+		service.DeleteFile(coverName, service.VIDEO_COVER)
+		return
+	} else {
 		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 0,
-			StatusMsg:  newVideoName + " uploaded successfully",
+			StatusMsg:  "Publish success",
 		})
 	}
 }
 
-// 截取视频封面
+// ReadFrameAsJpeg 截取视频封面
 func ReadFrameAsJpeg(filePath string) ([]byte, error) {
 	reader := bytes.NewBuffer(nil)
 	err := ffmpeg.Input(filePath).
@@ -161,6 +187,7 @@ func PublishList(c *gin.Context) {
 			VideoList: nil,
 			NextTime:  time.Now().Unix(),
 		})
+		return
 	}
 	//将获取的video输出，方便测试
 	//fmt.Printf("%#v", video)
