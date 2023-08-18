@@ -87,6 +87,8 @@ func Publish(c *gin.Context) {
 		})
 		return
 	}
+	//截取后面.MP4，防止最后拼接成.MP4.MP4
+	fileName = fileName[0 : len(fileName)-5]
 	newVideoName := fmt.Sprintf("%d-%s-%s", user.UserId, videoUUID, fileName)
 	// 调用上传函数上传视频
 	//函数的第二个参数需要是 []byte 类型
