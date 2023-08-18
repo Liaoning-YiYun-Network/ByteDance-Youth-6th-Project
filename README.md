@@ -1,6 +1,14 @@
-###  swagger使用文档
+### 运行该代码所必需的环境：
 
-接口文档地址：[Swagger UI](http://localhost:8080/swagger/index.html)
+### 一、安装ffmpeg
+
+因为本项目用到了抽帧制作图片，所以需要安装ffmpeg。
+
+安装参考该地址：http://t.csdn.cn/WVYWj
+
+###  二、配置swagger使用文档
+
+接口文档地址：[Swagger UI](http://localhost:9090/swagger/index.html)
 
 新增的接口，都加上以下注释将该接口添加到swagger接口文档
 
@@ -56,6 +64,18 @@ swag init
 
 
 
+### 三、启动项目
 
+1、首先转移go项目目录
 
+```shell
+cd go
+```
 
+2、安装所需要的依赖
+
+```shell
+go mod download
+```
+
+3、启动项目
