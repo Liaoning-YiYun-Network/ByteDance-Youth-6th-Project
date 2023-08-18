@@ -106,10 +106,7 @@ func Publish(c *gin.Context) {
 	err = service.UploadFile(coverName, coverBytes, service.VIDEO_COVER)
 	if err != nil {
 		fmt.Println("上传文件时发生错误：", err)
-		err := service.DeleteFile(newVideoName, service.VIDEO)
-		if err == nil {
-			fmt.Println("文件", newVideoName, "删除成功！")
-		}
+		service.DeleteFile(newVideoName, service.VIDEO)
 		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  coverName + " failed in uploading",
