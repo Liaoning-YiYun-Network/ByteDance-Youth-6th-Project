@@ -142,7 +142,7 @@ func Publish(c *gin.Context) {
 		fmt.Printf("视频封面截取失败%v\n", err)
 		c.JSON(http.StatusInternalServerError, entity.Response{
 			StatusCode: 1,
-			StatusMsg:  "error",
+			StatusMsg:  "截取视频封面出现错误",
 		})
 		return
 	}
