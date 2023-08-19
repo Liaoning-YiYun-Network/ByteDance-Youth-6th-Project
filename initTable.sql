@@ -20,7 +20,7 @@ CREATE TABLE video
     favorite_count int          DEFAULT '0' COMMENT '视频的点赞总数',
     comment_count  int          DEFAULT '0' COMMENT '视频的评论总数',
     title          varchar(128) NOT NULL COMMENT '视频标题',
-    create_time    datetime     NOT NULL COMMENT '上传时间',
+    create_time    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT COMMENT '上传时间',
     comment_db     varchar(128) NOT NULL COMMENT '评论存储文件名',
     PRIMARY KEY (id)
 );
