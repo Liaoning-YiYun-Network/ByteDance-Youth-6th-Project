@@ -88,7 +88,7 @@ func Publish(c *gin.Context) {
 		return
 	}
 	//截取后面.MP4，防止最后拼接成.MP4.MP4
-	fileName = fileName[0 : len(fileName)-5]
+	fileName = fileName[0 : len(fileName)-4]
 
 	//生成视频、视频封面地址
 	newVideoName := fmt.Sprintf("%d-%s-%s.mp4", user.UserId, videoUUID, fileName)
@@ -111,13 +111,47 @@ func Publish(c *gin.Context) {
 		return
 	}
 
+	// 调用上传函数上传视频
+	//函数的第二个参数需要是 []byte 类型
+	err = service.UploadFile(newVideoName, fileContent, service.VIDEO)
+	if err != nil {
+		err = service.DeleteSQLVideo(&entity.SQLVideo{
+			AuthorId: user.UserId,
+			Title:    c.PostForm("title"),
+			PlayUrl:  videoUrl,
+			CoverUrl: coverUrl,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, entity.Response{
+				StatusCode: 1,
+				StatusMsg:  "delete error",
+			})
+			return
+		}
+		// 处理错误
+		c.JSON(http.StatusInternalServerError, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "Failed to upload video file",
+		})
+		return
+	}
+
 	//截取视频封面
-	coverBytes, _ := ReadFrameAsJpeg(videoUrl)
+	coverBytes, err := ReadFrameAsJpeg(videoUrl)
+	if err != nil {
+		fmt.Printf("视频封面截取失败%v\n", err)
+		c.JSON(http.StatusInternalServerError, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "error",
+		})
+		return
+	}
 
 	// 调用上传函数上传视频封面
 	err = service.UploadFile(coverName, coverBytes, service.VIDEO_COVER)
 	if err != nil {
 		fmt.Println("上传文件时发生错误：", err)
+		err = service.DeleteFile(newVideoName, service.VIDEO)
 		err = service.DeleteSQLVideo(&entity.SQLVideo{
 			AuthorId: user.UserId,
 			Title:    c.PostForm("title"),
@@ -138,32 +172,6 @@ func Publish(c *gin.Context) {
 		return
 	} else {
 		fmt.Printf("文件%s上传成功！\n", newVideoName)
-	}
-
-	// 调用上传函数上传视频
-	//函数的第二个参数需要是 []byte 类型
-	err = service.UploadFile(newVideoName, fileContent, service.VIDEO)
-	if err != nil {
-		err = service.DeleteFile(coverName, service.VIDEO_COVER)
-		err = service.DeleteSQLVideo(&entity.SQLVideo{
-			AuthorId: user.UserId,
-			Title:    c.PostForm("title"),
-			PlayUrl:  videoUrl,
-			CoverUrl: coverUrl,
-		})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, entity.Response{
-				StatusCode: 1,
-				StatusMsg:  "delete error",
-			})
-			return
-		}
-		// 处理错误
-		c.JSON(http.StatusInternalServerError, entity.Response{
-			StatusCode: 1,
-			StatusMsg:  "Failed to upload video file",
-		})
-		return
 	}
 
 	c.JSON(http.StatusOK, entity.Response{
