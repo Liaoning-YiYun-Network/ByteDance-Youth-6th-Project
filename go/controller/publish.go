@@ -91,7 +91,7 @@ func Publish(c *gin.Context) {
 	fileName = fileName[0 : len(fileName)-5]
 
 	//生成视频、视频封面地址
-	newVideoName := fmt.Sprintf("%d-%s-%s", user.UserId, videoUUID, fileName)
+	newVideoName := fmt.Sprintf("%d-%s-%s.mp4", user.UserId, videoUUID, fileName)
 	videoUrl := "https://tos.eyunnet.com/videos/" + newVideoName
 	coverName := fmt.Sprintf("%d-%s-%s.jpg", user.UserId, videoUUID, fileName)
 	coverUrl := "https://tos.eyunnet.com/video_covers/" + coverName
