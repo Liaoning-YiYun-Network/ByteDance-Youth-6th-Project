@@ -89,35 +89,14 @@ func Publish(c *gin.Context) {
 	}
 	//截取后面.MP4，防止最后拼接成.MP4.MP4
 	fileName = fileName[0 : len(fileName)-5]
+
+	//生成视频、视频封面地址
 	newVideoName := fmt.Sprintf("%d-%s-%s", user.UserId, videoUUID, fileName)
-	// 调用上传函数上传视频
-	//函数的第二个参数需要是 []byte 类型
-	err = service.UploadFile(newVideoName, fileContent, service.VIDEO)
-	if err != nil {
-		// 处理错误
-		c.JSON(http.StatusInternalServerError, entity.Response{
-			StatusCode: 1,
-			StatusMsg:  "Failed to upload video file",
-		})
-		return
-	}
 	videoUrl := "https://tos.eyunnet.com/videos/" + newVideoName
-	coverBytes, _ := ReadFrameAsJpeg(videoUrl)
 	coverName := fmt.Sprintf("%d-%s-%s.jpg", user.UserId, videoUUID, fileName)
-	// 调用上传函数上传视频封面
-	err = service.UploadFile(coverName, coverBytes, service.VIDEO_COVER)
-	if err != nil {
-		fmt.Println("上传文件时发生错误：", err)
-		service.DeleteFile(newVideoName, service.VIDEO)
-		c.JSON(http.StatusOK, entity.Response{
-			StatusCode: 1,
-			StatusMsg:  coverName + " failed in uploading",
-		})
-		return
-	} else {
-		fmt.Printf("文件%s上传成功！\n", newVideoName)
-	}
 	coverUrl := "https://tos.eyunnet.com/video_covers/" + coverName
+
+	//在数据库中加入视频信息
 	err = service.CreateSQLVideo(&entity.SQLVideo{
 		AuthorId: user.UserId,
 		Title:    c.PostForm("title"),
@@ -129,15 +108,68 @@ func Publish(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  "Failed to save video info",
 		})
-		service.DeleteFile(newVideoName, service.VIDEO)
-		service.DeleteFile(coverName, service.VIDEO_COVER)
+		return
+	}
+
+	//截取视频封面
+	coverBytes, _ := ReadFrameAsJpeg(videoUrl)
+
+	// 调用上传函数上传视频封面
+	err = service.UploadFile(coverName, coverBytes, service.VIDEO_COVER)
+	if err != nil {
+		fmt.Println("上传文件时发生错误：", err)
+		err = service.DeleteSQLVideo(&entity.SQLVideo{
+			AuthorId: user.UserId,
+			Title:    c.PostForm("title"),
+			PlayUrl:  videoUrl,
+			CoverUrl: coverUrl,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, entity.Response{
+				StatusCode: 1,
+				StatusMsg:  "delete error",
+			})
+			return
+		}
+		c.JSON(http.StatusOK, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  coverName + " failed in uploading",
+		})
 		return
 	} else {
-		c.JSON(http.StatusOK, entity.Response{
-			StatusCode: 0,
-			StatusMsg:  "Publish success",
-		})
+		fmt.Printf("文件%s上传成功！\n", newVideoName)
 	}
+
+	// 调用上传函数上传视频
+	//函数的第二个参数需要是 []byte 类型
+	err = service.UploadFile(newVideoName, fileContent, service.VIDEO)
+	if err != nil {
+		err = service.DeleteFile(coverName, service.VIDEO_COVER)
+		err = service.DeleteSQLVideo(&entity.SQLVideo{
+			AuthorId: user.UserId,
+			Title:    c.PostForm("title"),
+			PlayUrl:  videoUrl,
+			CoverUrl: coverUrl,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, entity.Response{
+				StatusCode: 1,
+				StatusMsg:  "delete error",
+			})
+			return
+		}
+		// 处理错误
+		c.JSON(http.StatusInternalServerError, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "Failed to upload video file",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, entity.Response{
+		StatusCode: 0,
+		StatusMsg:  "Publish success",
+	})
 }
 
 // ReadFrameAsJpeg 截取视频封面
