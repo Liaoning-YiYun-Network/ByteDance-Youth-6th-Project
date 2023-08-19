@@ -115,19 +115,12 @@ func Publish(c *gin.Context) {
 	//函数的第二个参数需要是 []byte 类型
 	err = service.UploadFile(newVideoName, fileContent, service.VIDEO)
 	if err != nil {
-		err = service.DeleteSQLVideo(&entity.SQLVideo{
+		service.DeleteSQLVideo(&entity.SQLVideo{
 			AuthorId: user.UserId,
 			Title:    c.PostForm("title"),
 			PlayUrl:  videoUrl,
 			CoverUrl: coverUrl,
 		})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, entity.Response{
-				StatusCode: 1,
-				StatusMsg:  "delete error",
-			})
-			return
-		}
 		// 处理错误
 		c.JSON(http.StatusInternalServerError, entity.Response{
 			StatusCode: 1,
@@ -151,21 +144,14 @@ func Publish(c *gin.Context) {
 	err = service.UploadFile(coverName, coverBytes, service.VIDEO_COVER)
 	if err != nil {
 		fmt.Println("上传文件时发生错误：", err)
-		err = service.DeleteFile(newVideoName, service.VIDEO)
-		err = service.DeleteSQLVideo(&entity.SQLVideo{
+		service.DeleteFile(newVideoName, service.VIDEO)
+		service.DeleteSQLVideo(&entity.SQLVideo{
 			AuthorId: user.UserId,
 			Title:    c.PostForm("title"),
 			PlayUrl:  videoUrl,
 			CoverUrl: coverUrl,
 		})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, entity.Response{
-				StatusCode: 1,
-				StatusMsg:  "delete error",
-			})
-			return
-		}
-		c.JSON(http.StatusOK, entity.Response{
+		c.JSON(http.StatusInternalServerError, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  coverName + " failed in uploading",
 		})
