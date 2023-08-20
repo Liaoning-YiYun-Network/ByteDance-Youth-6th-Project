@@ -50,7 +50,7 @@ func GetAllCommentsByDBName(dbName string) (comments []entity.DBComment, err err
 func AddCommentByDBName(dbName string, comment entity.DBComment) error {
 	//如果已经打开过这个数据库，就直接从缓存中取出
 	if db, ok := data.TempSQLiteConnects[dbName]; ok {
-		_, err := db.Exec("INSERT INTO comments (comment_id, userid, content, time) VALUES (?, ?, ?, ?)", comment.CommentID, comment.UserID, comment.Content, comment.Time)
+		_, err := db.Exec("INSERT INTO comments (userid, content, time) VALUES (?, ?, ?, ?)", comment.UserID, comment.Content, comment.Time)
 		if err != nil {
 			return fmt.Errorf("尝试插入SQLite数据库时发生错误：%s", err)
 		}
@@ -61,7 +61,7 @@ func AddCommentByDBName(dbName string, comment entity.DBComment) error {
 			return fmt.Errorf("尝试打开SQLite数据库时发生错误：%s", err)
 		}
 		data.TempSQLiteConnects[dbName] = db
-		_, err = db.Exec("INSERT INTO comments (comment_id, userid, content, time) VALUES (?, ?, ?, ?)", comment.CommentID, comment.UserID, comment.Content, comment.Time)
+		_, err = db.Exec("INSERT INTO comments (userid, content, time) VALUES (?, ?, ?, ?)", comment.UserID, comment.Content, comment.Time)
 		if err != nil {
 			return fmt.Errorf("尝试插入SQLite数据库时发生错误：%s", err)
 		}
