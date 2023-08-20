@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"sync/atomic"
 )
 
 var usersLoginInfo map[string]entity.User
@@ -73,7 +74,7 @@ func Register(c *gin.Context) {
 			UserId:   userIdSequence,
 			Token:    token,
 		})
-		err = dao.SetRedisWithExpire(token, username, 60)
+		err = dao.SetRedis(token, username)
 		if err != nil {
 			fmt.Println("Register success, but Redis occurred an error:", err)
 		}
@@ -103,7 +104,7 @@ func Register(c *gin.Context) {
 		if err != nil {
 			fmt.Println("Register success, but UserDetail occurred an error:", err)
 		}
-		userIdSequence++
+		atomic.AddInt64(&userIdSequence, 1)
 	}
 }
 
@@ -143,7 +144,7 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
-	err = dao.SetRedisWithExpire(token, username, 240)
+	err = dao.SetRedis(token, username)
 	if err != nil {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: entity.Response{StatusCode: 1, StatusMsg: "Login Failed"},

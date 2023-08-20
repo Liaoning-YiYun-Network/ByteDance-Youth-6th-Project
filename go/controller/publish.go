@@ -28,7 +28,7 @@ func Publish(c *gin.Context) {
 	token := c.PostForm("token")
 	username, err := dao.GetRedis(token)
 	if err != nil {
-		c.JSON(http.StatusForbidden, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "token invalid or expired",
 		})
@@ -36,7 +36,7 @@ func Publish(c *gin.Context) {
 	}
 	user, err := service.GetSQLUserByName(username)
 	if err != nil {
-		c.JSON(http.StatusForbidden, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "user not exist",
 		})
@@ -44,7 +44,7 @@ func Publish(c *gin.Context) {
 	}
 	data, err := c.FormFile("data")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "Failed to get file",
 		})
@@ -55,7 +55,7 @@ func Publish(c *gin.Context) {
 	// 设置文件大小限制，例如 500MB
 	maxFileSize := int64(500 * 1024 * 1024) // 500MB
 	if fileSize > maxFileSize {
-		c.JSON(http.StatusRequestEntityTooLarge, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "File size exceeds the limit",
 		})
@@ -63,7 +63,7 @@ func Publish(c *gin.Context) {
 	}
 	file, err := data.Open()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "Failed to open file",
 		})
@@ -72,7 +72,7 @@ func Publish(c *gin.Context) {
 	defer file.Close()
 	fileContent, err := io.ReadAll(file)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "Failed to read file",
 		})
@@ -99,7 +99,7 @@ func Publish(c *gin.Context) {
 	//分配comments.db
 	dbName, err := dao.CreateDB(dao.COMMENTS, int(user.UserId))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "Failed to create video info",
 		})
@@ -114,7 +114,7 @@ func Publish(c *gin.Context) {
 		CommentDB: dbName,
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "Failed to save video info",
 		})
@@ -134,7 +134,7 @@ func Publish(c *gin.Context) {
 		})
 		dao.DeleteDB(dao.COMMENTS, dbName)
 		// 处理错误
-		c.JSON(http.StatusInternalServerError, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "Failed to upload video file",
 		})
@@ -145,7 +145,7 @@ func Publish(c *gin.Context) {
 	coverBytes, err := ReadFrameAsJpeg(videoUrl)
 	if err != nil {
 		fmt.Printf("视频封面截取失败%v\n", err)
-		c.JSON(http.StatusInternalServerError, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "截取视频封面出现错误",
 		})
@@ -164,7 +164,7 @@ func Publish(c *gin.Context) {
 			CoverUrl: coverUrl,
 		})
 		dao.DeleteDB(dao.COMMENTS, dbName)
-		c.JSON(http.StatusInternalServerError, entity.Response{
+		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  coverName + " failed in uploading",
 		})
