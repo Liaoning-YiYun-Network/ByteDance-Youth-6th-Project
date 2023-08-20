@@ -11,7 +11,7 @@ import (
 func GetAllCommentsByDBName(dbName string) (comments []entity.DBComment, err error) {
 	//如果已经打开过这个数据库，就直接从缓存中取出
 	if db, ok := data.TempSQLiteConnects[dbName]; ok {
-		rows, err := db.Query("SELECT * FROM comments")
+		rows, err := db.Query("SELECT * FROM comments ORDER BY time DESC")
 		if err != nil {
 			return nil, fmt.Errorf("尝试查询SQLite数据库时发生错误：%s", err)
 		}
@@ -30,7 +30,7 @@ func GetAllCommentsByDBName(dbName string) (comments []entity.DBComment, err err
 			return nil, fmt.Errorf("尝试打开SQLite数据库时发生错误：%s", err)
 		}
 		data.TempSQLiteConnects[dbName] = db
-		rows, err := db.Query("SELECT * FROM comments")
+		rows, err := db.Query("SELECT * FROM comments ORDER BY time DESC")
 		if err != nil {
 			return nil, fmt.Errorf("尝试查询SQLite数据库时发生错误：%s", err)
 		}
