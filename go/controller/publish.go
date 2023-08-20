@@ -96,18 +96,29 @@ func Publish(c *gin.Context) {
 	coverName := fmt.Sprintf("%d-%s-%s.jpg", user.UserId, videoUUID, fileName)
 	coverUrl := "https://tos.eyunnet.com/video_covers/" + coverName
 
+	//分配comments.db
+	dbName, err := dao.CreateDB(dao.COMMENTS, int(user.UserId))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "Failed to create video info",
+		})
+		return
+	}
 	//在数据库中加入视频信息
 	err = service.CreateSQLVideo(&entity.SQLVideo{
-		AuthorId: user.UserId,
-		Title:    c.PostForm("title"),
-		PlayUrl:  videoUrl,
-		CoverUrl: coverUrl,
+		AuthorId:  user.UserId,
+		Title:     c.PostForm("title"),
+		PlayUrl:   videoUrl,
+		CoverUrl:  coverUrl,
+		CommentDB: dbName,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  "Failed to save video info",
 		})
+		dao.DeleteDB(dao.COMMENTS, dbName)
 		return
 	}
 
@@ -121,6 +132,7 @@ func Publish(c *gin.Context) {
 			PlayUrl:  videoUrl,
 			CoverUrl: coverUrl,
 		})
+		dao.DeleteDB(dao.COMMENTS, dbName)
 		// 处理错误
 		c.JSON(http.StatusInternalServerError, entity.Response{
 			StatusCode: 1,
@@ -151,6 +163,7 @@ func Publish(c *gin.Context) {
 			PlayUrl:  videoUrl,
 			CoverUrl: coverUrl,
 		})
+		dao.DeleteDB(dao.COMMENTS, dbName)
 		c.JSON(http.StatusInternalServerError, entity.Response{
 			StatusCode: 1,
 			StatusMsg:  coverName + " failed in uploading",

@@ -63,3 +63,22 @@ func CreateDB(dbType DBType, id int) (string, error) {
 	}
 	return "", fmt.Errorf("尝试创建SQLite数据库时发生错误：未知的数据库类型")
 }
+
+// DeleteDB 根据给定的数据库名称删除一个sqlite数据库并返回是否错误
+func DeleteDB(dbType DBType, dbName string) error {
+	var err error
+	switch dbType {
+	case FOLLOWS:
+		err = util.DeleteFile("./dbs/follows/" + dbName)
+	case FOLLOWERS:
+		err = util.DeleteFile("./dbs/followers/" + dbName)
+	case COMMENTS:
+		err = util.DeleteFile("./dbs/comments/" + dbName)
+	case FAVORITES:
+		err = util.DeleteFile("./dbs/favorites/" + dbName)
+	}
+	if err != nil {
+		return fmt.Errorf("尝试删除SQLite数据库时发生错误：%s", err)
+	}
+	return nil
+}

@@ -64,16 +64,9 @@ func CloseTOS() {
 // fileType 文件类型
 // 返回错误信息
 func UploadFile(fileName string, fileContent []byte, fileType TOSFileType) error {
-	var pathPrefix string
-	switch fileType {
-	case VIDEO_COVER:
-		pathPrefix = "video_covers/"
-	case VIDEO:
-		pathPrefix = "videos/"
-	case AVATAR:
-		pathPrefix = "avatars/"
-	case BACKGROUND:
-		pathPrefix = "backgrounds/"
+	pathPrefix, err := processFileType(fileType)
+	if err != nil {
+		return err
 	}
 	var key = pathPrefix + fileName
 	var ctx = context.Background()
@@ -94,6 +87,22 @@ func UploadFile(fileName string, fileContent []byte, fileType TOSFileType) error
 // fileType 文件类型
 // 返回错误信息
 func DeleteFile(fileName string, fileType TOSFileType) error {
+	pathPrefix, err := processFileType(fileType)
+	if err != nil {
+		return err
+	}
+	var key = pathPrefix + fileName
+	var ctx = context.Background()
+	output, err := client.DeleteObjectV2(ctx, &tos.DeleteObjectV2Input{
+		Bucket: BucketName,
+		Key:    key,
+	})
+	fmt.Println("DeleteFile: ", fileName, " Request ID: ", output.RequestID, " Status: ", output.StatusCode)
+	return err
+}
+
+// processFileType 处理文件类型并返回对应文件prefix
+func processFileType(fileType TOSFileType) (string, error) {
 	var pathPrefix string
 	switch fileType {
 	case VIDEO_COVER:
@@ -104,13 +113,8 @@ func DeleteFile(fileName string, fileType TOSFileType) error {
 		pathPrefix = "avatars/"
 	case BACKGROUND:
 		pathPrefix = "backgrounds/"
+	default:
+		return "", fmt.Errorf("未知的文件类型")
 	}
-	var key = pathPrefix + fileName
-	var ctx = context.Background()
-	output, err := client.DeleteObjectV2(ctx, &tos.DeleteObjectV2Input{
-		Bucket: BucketName,
-		Key:    key,
-	})
-	fmt.Println("DeleteFile: ", fileName, " Request ID: ", output.RequestID, " Status: ", output.StatusCode)
-	return err
+	return pathPrefix, nil
 }

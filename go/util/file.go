@@ -66,3 +66,8 @@ func isDirExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
 }
+
+// DeleteFile 删除文件
+func DeleteFile(path string) error {
+	return os.Remove(path)
+}
