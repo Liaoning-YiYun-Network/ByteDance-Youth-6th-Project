@@ -11,3 +11,9 @@ type SQLUser struct {
 func (SQLUser) TableName() string {
 	return "user"
 }
+
+func (su *SQLUser) ToUser() User {
+	return User{
+		// 将 SQLUser 的字段赋值给 User 的字段
+	}
+}
