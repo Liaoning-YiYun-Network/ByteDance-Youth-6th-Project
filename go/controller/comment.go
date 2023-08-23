@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"SkyLine/dao"
+	"SkyLine/data"
 	"SkyLine/entity"
 	"SkyLine/perm"
 	"SkyLine/service"
+	"SkyLine/util/type_conv"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -21,42 +22,45 @@ type CommentActionResponse struct {
 	Comment entity.Comment `json:"comment,omitempty"`
 }
 
-// CommentAction no practical effect, just check if token is valid
+// CommentAction add or delete comment
 func CommentAction(c *gin.Context) {
 	token := c.Query("token")
-	username, err := dao.GetRedis(token)
-	user, err := service.GetSQLUserByName(username)
-	isValid, _ := perm.ValidateToken(token)
-	actionType := c.Query("action_type")
-	id := c.Query("comment_id")
-	idInt, err := strconv.ParseInt(id, 10, 64)
+	vid := c.Query("video_id")
+	vidInt, _ := strconv.Atoi(vid)
+	sv, err := service.GetSQLVideoById(vidInt)
 	if err != nil {
+		c.JSON(http.StatusOK, CommentActionResponse{
+			Response: entity.Response{StatusCode: 1, StatusMsg: "Failed to get video"},
+		})
 		return
 	}
+	isValid, msg, user := perm.ValidateToken(token)
+	actionType := c.Query("action_type")
 	// 检查用户登录状态
 	if isValid {
 		if actionType == "1" {
+			all, err := service.GetAllCommentsByDBName(sv.CommentDB)
+			commentID := len(all) + 1
 			// 获取评论内容
 			commentText := c.Query("comment_text")
 
 			// 创建评论对象
 			newComment := entity.Comment{
-				Id:         idInt,
-				User:       user.ToUser(), // 使用 ToUser 方法进行转换
+				Id:         int64(commentID),
+				User:       type_conv.ToUser(*user),
 				Content:    commentText,
 				CreateDate: time.Now().Format("05-15"),
 			}
 			// 在数据库中添加评论
-			err := service.AddCommentByDBName("your_database_name", entity.DBComment{
+			err = service.AddCommentByDBName(sv.CommentDB, entity.DBComment{
 				CommentID: newComment.Id,
 				UserID:    newComment.User.Id,
 				Content:   newComment.Content,
 				Time:      newComment.CreateDate,
 			})
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, entity.Response{
-					StatusCode: 1,
-					StatusMsg:  "Failed to add comment to the database",
+				c.JSON(http.StatusOK, CommentActionResponse{
+					Response: entity.Response{StatusCode: 1, StatusMsg: "Failed to add comment"},
 				})
 				return
 			}
@@ -66,55 +70,66 @@ func CommentAction(c *gin.Context) {
 				Comment:  newComment,
 			})
 			return
-		}
-		if actionType == "2" {
+		} else {
 			commentIDStr := c.Query("comment_id")
-			commentID, err := strconv.ParseInt(commentIDStr, 10, 64)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, entity.Response{StatusCode: 2, StatusMsg: "Invalid comment ID"})
-				return
-			}
+			commentID, _ := strconv.ParseInt(commentIDStr, 10, 64)
 
 			// 调用删除评论的函数
-			err = service.DeleteCommentByDBName("your_database_name", commentID)
+			err := service.DeleteCommentByDBName(sv.CommentDB, commentID)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, entity.Response{StatusCode: 3, StatusMsg: "Failed to delete comment"})
+				c.JSON(http.StatusInternalServerError, CommentActionResponse{
+					Response: entity.Response{StatusCode: 1, StatusMsg: "Failed to delete comment"},
+				})
 				return
 			}
 
-			c.JSON(http.StatusOK, entity.Response{StatusCode: 0})
+			c.JSON(http.StatusOK, CommentActionResponse{
+				Response: entity.Response{StatusCode: 0, StatusMsg: "Delete comment success"},
+			})
 			return
 		}
-		c.JSON(http.StatusOK, entity.Response{StatusCode: 0})
 	} else {
 		// 未登录用户
-		c.JSON(http.StatusOK, entity.Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		c.JSON(http.StatusOK, CommentActionResponse{
+			Response: entity.Response{StatusCode: 1, StatusMsg: msg},
+		})
 	}
 
 }
 
-// CommentList all videos have same demo comment list
 // CommentList 获取视频的所有评论，并按发布时间倒序排列
 func CommentList(c *gin.Context) {
-	videoID := c.Query("video_id") // 从请求中获取视频标识符
-
+	videoID, _ := strconv.Atoi(c.Query("video_id")) // 从请求中获取视频标识符
+	sv, err := service.GetSQLVideoById(videoID)
 	// 使用 videoID 获取与该视频相关的评论数据，按发布时间倒序排列
-	dbComments, err := service.GetAllCommentsByDBName(videoID)
+	dbComments, err := service.GetAllCommentsByDBName(sv.CommentDB)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusOK, CommentListResponse{
+			Response: entity.Response{StatusCode: 1, StatusMsg: "Failed to get comments"},
+		})
 		return
 	}
 
 	// 将 DBComment 转换为 Comment 类型
-	var comments []entity.Comment
+	comments := make([]entity.Comment, 0)
 	for _, dbComment := range dbComments {
-		comment := entity.Comment{
-			Id:         dbComment.CommentID,
-			User:       entity.User{Id: dbComment.UserID}, // 假设 User 有一个 Id 字段
-			Content:    dbComment.Content,
-			CreateDate: dbComment.Time,
+		ud, err := service.GetUserDetailById(int(dbComment.UserID))
+		if err != nil {
+			data.Logger.Error("Failed to get user detail by id: ", dbComment.UserID, ", Skip!")
+			continue
+		} else {
+			comments = append(comments, entity.Comment{
+				Id: dbComment.CommentID,
+				User: entity.User{
+					Id:            dbComment.UserID,
+					Name:          ud.Name,
+					FollowCount:   ud.FollowCount,
+					FollowerCount: ud.FollowerCount,
+				}, // 假设 User 有一个 Id 字段
+				Content:    dbComment.Content,
+				CreateDate: dbComment.Time,
+			})
 		}
-		comments = append(comments, comment)
 	}
 
 	// 构造响应结构体
