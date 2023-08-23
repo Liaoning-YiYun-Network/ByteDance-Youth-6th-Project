@@ -19,7 +19,7 @@ type ChatResponse struct {
 	MessageList []entity.Message `json:"message_list"`
 }
 
-// MessageAction no practical effect, just check if token is valid
+// MessageAction 向指定用户ID发送消息
 func MessageAction(c *gin.Context) {
 	token := c.Query("token")
 	toUserId := c.Query("to_user_id")
@@ -47,7 +47,7 @@ func MessageAction(c *gin.Context) {
 	}
 }
 
-// MessageChat all users have same follow list
+// MessageChat 查询与指定用户ID的聊天记录
 func MessageChat(c *gin.Context) {
 	token := c.Query("token")
 	toUserId := c.Query("to_user_id")

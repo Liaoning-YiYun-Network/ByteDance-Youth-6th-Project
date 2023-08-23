@@ -2,7 +2,7 @@ server: #项目配置
   port: 9090
   mode: debug #debug|release
 db: #数据库配置
-  url: youth6th-db.lnyynet.com
+  url: youth6th-db.eyunnet.com
   userName: skyline
   password: yxFR23SKYLINE
   dbname: skyline
