@@ -14,11 +14,11 @@ import (
 func ValidateToken(token string) (bool, string, *entity.SQLUser) {
 	username, err := dao.GetRedis(token)
 	if err != nil {
-		return false, "Token Invalid  or expired", new(entity.SQLUser)
+		return false, "Token Invalid or expired", &entity.SQLUser{}
 	}
 	user, err := service.GetSQLUserByName(username)
 	if err != nil {
-		return false, "User doesn't exist", new(entity.SQLUser)
+		return false, "User doesn't exist", &entity.SQLUser{}
 	}
 	return true, "", user
 }

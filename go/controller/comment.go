@@ -77,7 +77,7 @@ func CommentAction(c *gin.Context) {
 				Id:         tmpIdSequence[vidInt],
 				User:       user,
 				Content:    commentText,
-				CreateDate: strconv.FormatInt(time.Now().Unix(), 10),
+				CreateDate: time.Now().Format("MM-DD"),
 			}
 			// 在数据库中添加评论
 			err = service.AddCommentByDBName(sv.CommentDB, entity.DBComment{
