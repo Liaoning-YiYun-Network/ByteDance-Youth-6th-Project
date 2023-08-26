@@ -7,7 +7,9 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/uuid v1.1.2
 	github.com/jinzhu/gorm v1.9.16
+	github.com/mattn/go-sqlite3 v1.14.0
 	github.com/sirupsen/logrus v1.9.3
+	github.com/u2takey/ffmpeg-go v0.5.0
 	github.com/volcengine/ve-tos-golang-sdk/v2 v2.6.1
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
 )
@@ -46,7 +48,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
-	github.com/u2takey/ffmpeg-go v0.5.0 // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
