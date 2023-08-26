@@ -26,7 +26,7 @@ func CommentAction(c *gin.Context) {
 	token := c.Query("token")
 	username, err := dao.GetRedis(token)
 	user, err := service.GetSQLUserByName(username)
-	isValid, _ := perm.ValidateToken(token)
+	isValid, _, _ := perm.ValidateToken(token)
 	actionType := c.Query("action_type")
 	id := c.Query("comment_id")
 	idInt, err := strconv.ParseInt(id, 10, 64)
