@@ -96,6 +96,7 @@ func CommentAction(c *gin.Context) {
 				Response: entity.Response{StatusCode: 0},
 				Comment:  newComment,
 			})
+			tmpIdSequence[vidInt]++
 			return
 		} else {
 			// ！！！由于此处的数值是从客户端传过来的，所以不考虑出现异常的情况。但是在Restful API中，应该考虑到异常情况。
