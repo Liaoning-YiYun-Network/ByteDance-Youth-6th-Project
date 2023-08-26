@@ -179,6 +179,25 @@ func DeleteFollowByDBName(dbName string, followId int64) error {
 	}
 }
 
+// 根据用户id查看作者列表是其粉丝
+func GetFollowByUserId(dbName string, userId int64) (bool, error) {
+	if db, ok := data.TempSQLiteConnects[dbName]; ok {
+		res, err := db.Exec("SELECT FROM follows WHERE userid = ?", userId)
+		if err != nil {
+			return false, fmt.Errorf("尝试删除SQLite数据库时发生错误：%s", err)
+		}
+		fmt.Println(res)
+		return false, nil
+	} else {
+		db, err := sql.Open("sqlite3", "./dbs/follows/"+dbName)
+		if err != nil {
+			return false, fmt.Errorf("尝试打开SQLite数据库时发生错误：%s", err)
+		}
+		_, err = db.Exec("SELECT FROM follows WHERE userid = ?", userId)
+	}
+	return false, nil
+}
+
 // GetAllFollowersByDBName 根据数据库名称获取所有粉丝
 func GetAllFollowersByDBName(dbName string) ([]int64, error) {
 	//如果已经打开过这个数据库，就直接从缓存中取出

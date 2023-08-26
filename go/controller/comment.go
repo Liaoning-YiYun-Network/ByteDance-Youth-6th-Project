@@ -28,6 +28,7 @@ func CommentAction(c *gin.Context) {
 	vid := c.Query("video_id")
 	vidInt, _ := strconv.Atoi(vid)
 	sv, err := service.GetSQLVideoById(vidInt)
+
 	if err != nil {
 		c.JSON(http.StatusOK, CommentActionResponse{
 			Response: entity.Response{StatusCode: 1, StatusMsg: "Failed to get video"},

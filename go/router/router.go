@@ -49,21 +49,21 @@ func InitBasePlatformRouter(r *gin.Engine) {
 	apiRouter.GET("/user/", controller2.UserInfo)
 	apiRouter.POST("/user/register/", controller2.Register)
 	apiRouter.POST("/user/login/", controller2.Login)
-	apiRouter.POST("/publish/action/", controller2.Publish)
+	apiRouter.POST("/publish/action/", verifyLogin, controller2.Publish)
 	apiRouter.GET("/publish/list/", controller2.PublishList)
 
 	// extra apis - I
-	apiRouter.POST("/favorite/action/", controller2.FavoriteAction)
-	apiRouter.GET("/favorite/list/", controller2.FavoriteList)
-	apiRouter.POST("/comment/action/", controller2.CommentAction)
+	apiRouter.POST("/favorite/action/", verifyLogin, controller2.FavoriteAction)
+	apiRouter.GET("/favorite/list/", verifyLogin, controller2.FavoriteList)
+	apiRouter.POST("/comment/action/", verifyLogin, controller2.CommentAction)
 	apiRouter.GET("/comment/list/", controller2.CommentList)
 
 	// extra apis - II
-	apiRouter.POST("/relation/action/", controller2.RelationAction)
-	apiRouter.GET("/relation/follow/list/", controller2.FollowList)
-	apiRouter.GET("/relation/follower/list/", controller2.FollowerList)
-	apiRouter.GET("/relation/friend/list/", controller2.FriendList)
-	apiRouter.GET("/message/chat/", controller2.MessageChat)
-	apiRouter.POST("/message/action/", controller2.MessageAction)
+	apiRouter.POST("/relation/action/", verifyLogin, controller2.RelationAction)
+	apiRouter.GET("/relation/follow/list/", verifyLogin, controller2.FollowList)
+	apiRouter.GET("/relation/follower/list/", verifyLogin, controller2.FollowerList)
+	apiRouter.GET("/relation/friend/list/", verifyLogin, controller2.FriendList)
+	apiRouter.GET("/message/chat/", verifyLogin, controller2.MessageChat)
+	apiRouter.POST("/message/action/", verifyLogin, controller2.MessageAction)
 
 }

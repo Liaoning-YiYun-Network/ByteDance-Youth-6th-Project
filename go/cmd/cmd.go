@@ -15,16 +15,13 @@ func Start() {
 	//初始化读取配置文件
 	config.InitConfig()
 
-	defer dao.CloseMySql()
-	defer dao.CloseRedis()
-	defer service.CloseTOS()
-
 	//初始化数据库
 	err := dao.InitMySql()
 	if err != nil {
 		fmt.Println("数据库初始化失败，请检查数据库配置是否正确，运行终止！")
 		panic(err)
 	}
+	defer dao.CloseMySql()
 	fmt.Println("初始化数据库成功")
 
 	//初始化redis
@@ -33,6 +30,7 @@ func Start() {
 		fmt.Println("Redis初始化失败，请检查Redis配置是否正确，运行终止！")
 		panic(err)
 	}
+	defer dao.CloseRedis()
 	fmt.Println("初始化Redis成功")
 
 	err = service.InitTOS()
@@ -40,6 +38,7 @@ func Start() {
 		fmt.Println("TOS初始化失败，请检查TOS配置是否正确，运行终止！")
 		panic(err)
 	}
+	defer service.CloseTOS()
 	fmt.Println("初始化TOS成功")
 
 	go func() {
