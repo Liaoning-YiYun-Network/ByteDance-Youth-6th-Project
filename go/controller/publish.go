@@ -97,7 +97,7 @@ func Publish(c *gin.Context) {
 	coverUrl := "https://tos.eyunnet.com/video_covers/" + coverName
 
 	//分配comments.db
-	dbName, err := dao.CreateDB(dao.COMMENTS, int(user.UserId))
+	dbName, err := dao.CreateDB(dao.COMMENTS, strconv.FormatInt(user.UserId, 10))
 	if err != nil {
 		c.JSON(http.StatusOK, entity.Response{
 			StatusCode: 1,
