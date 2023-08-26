@@ -3,12 +3,13 @@ package service
 import (
 	"SkyLine/dao"
 	"SkyLine/entity"
+	"strconv"
 	"testing"
 	"time"
 )
 
 func TestAddCommentByDBName(t *testing.T) {
-	dbName, err := dao.CreateDB(dao.COMMENTS, 114514)
+	dbName, err := dao.CreateDB(dao.COMMENTS, strconv.Itoa(114514))
 	if err != nil {
 		t.Error(err)
 		return

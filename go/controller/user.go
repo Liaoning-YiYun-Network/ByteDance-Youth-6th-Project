@@ -78,15 +78,15 @@ func Register(c *gin.Context) {
 		if err != nil {
 			fmt.Println("Register success, but Redis occurred an error:", err)
 		}
-		followDBName, err := dao.CreateDB(dao.FOLLOWS, int(userIdSequence))
+		followDBName, err := dao.CreateDB(dao.FOLLOWS, strconv.FormatInt(userIdSequence, 10))
 		if err != nil {
 			fmt.Println("Register success, but create followDB occurred an error:", err)
 		}
-		followerDBName, err := dao.CreateDB(dao.FOLLOWERS, int(userIdSequence))
+		followerDBName, err := dao.CreateDB(dao.FOLLOWERS, strconv.FormatInt(userIdSequence, 10))
 		if err != nil {
 			fmt.Println("Register success, but create followerDB occurred an error:", err)
 		}
-		favoriteDBName, err := dao.CreateDB(dao.FAVORITES, int(userIdSequence))
+		favoriteDBName, err := dao.CreateDB(dao.FAVORITES, strconv.FormatInt(userIdSequence, 10))
 		if err != nil {
 			fmt.Println("Register success, but create favoriteDB occurred an error:", err)
 		}
