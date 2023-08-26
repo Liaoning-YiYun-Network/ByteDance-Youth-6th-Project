@@ -62,3 +62,15 @@ func GetSQLUserList() ([]*entity.SQLUser, error) {
 	err := dao.SqlSession.Find(&users).Error
 	return users, err
 }
+
+//GetFollowAndFollowerByUserid 根据用户id获取关注和粉丝所存储的数据库名
+
+//userid 用户id
+
+//return 关注和粉丝所存储的数据库名
+
+func GetFollowAndFollowerByUserid(Userid int64) (follow, follower string, err error) {
+	var users *entity.UserDetail
+	err = dao.SqlSession.Where("userid = ?", Userid).Find(&users).Error
+	return users.FollowDB, users.FollowerDB, err
+}
