@@ -33,6 +33,7 @@ func RelationAction(c *gin.Context) {
 		_, hisFollower, err := service.GetFollowAndFollowerByUserid(int64(hisId))
 		if err != nil {
 			fmt.Println("获取失败")
+			c.JSON(http.StatusInternalServerError, entity.Response{StatusCode: 1, StatusMsg: "进行关注失败"})
 		} else {
 			service.AddFollowByDBName(myFollow, int64(hisId))
 			service.AddFollowByDBName(hisFollower, user.UserId)
@@ -44,6 +45,7 @@ func RelationAction(c *gin.Context) {
 		_, hisFollower, err := service.GetFollowAndFollowerByUserid(int64(hisId))
 		if err != nil {
 			fmt.Println("获取失败")
+			c.JSON(http.StatusInternalServerError, entity.Response{StatusCode: 1, StatusMsg: "进行取消关注失败"})
 		} else {
 			service.DeleteFollowByDBName(myFollow, int64(hisId))
 			service.DeleteFollowByDBName(hisFollower, user.UserId)
