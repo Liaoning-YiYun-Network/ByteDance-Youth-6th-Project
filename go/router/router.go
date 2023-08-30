@@ -2,6 +2,7 @@ package router
 
 import (
 	controller2 "SkyLine/controller"
+	"SkyLine/data"
 	_ "SkyLine/docs"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,7 @@ func InitRouter() {
 
 	err := r.Run(fmt.Sprintf(":%s", setPort))
 	if err != nil {
-		fmt.Println("路由初始化失败")
+		data.Logger.Error("路由初始化失败！")
 	}
 }
 
