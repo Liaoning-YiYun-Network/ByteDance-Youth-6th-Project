@@ -5,7 +5,6 @@ import (
 	"SkyLine/entity"
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 // GetAllCommentsByDBName 根据数据库名称获取所有评论
