@@ -75,7 +75,12 @@ func CreateDB(dbType DBType, id string) (string, error) {
 		}
 		return namePrefix, nil
 	case MESSAGES:
-
+		namePrefix = string(MESSAGES) + "-" + id + ".sqlite"
+		err := util.CopyFile("./resources/default_dbs/messages.sqlite", "./dbs/messages/"+namePrefix)
+		if err != nil {
+			return "", fmt.Errorf("尝试创建SQLite数据库时发生错误：%s", err)
+		}
+		return namePrefix, nil
 	}
 	return "", fmt.Errorf("尝试创建SQLite数据库时发生错误：未知的数据库类型")
 }

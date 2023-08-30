@@ -18,7 +18,7 @@ func CopyFile(src, dst string) error {
 		}
 	}
 	// 判断目标目录是否存在，不存在则创建
-	exist := isDirExist(parentDir)
+	exist := IsDirExist(parentDir)
 	if !exist {
 		err := os.MkdirAll(parentDir, os.ModePerm)
 		if err != nil {
@@ -61,10 +61,16 @@ func RenameFile(src, dst string) error {
 	return os.Rename(src, dst)
 }
 
-// isDirExist 判断目录是否存在
-func isDirExist(path string) bool {
+// IsDirExist 判断目录是否存在
+func IsDirExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
+}
+
+// IsFileExist 判断文件是否存在
+func IsFileExist(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }
 
 // DeleteFile 删除文件

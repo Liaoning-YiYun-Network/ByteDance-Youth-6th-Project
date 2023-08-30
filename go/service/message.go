@@ -1,9 +1,11 @@
 package service
 
 import (
+	"SkyLine/data"
 	"SkyLine/entity"
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/viper"
 	"io"
 	"net"
 	"sync"
@@ -12,7 +14,12 @@ import (
 var chatConnMap = sync.Map{}
 
 func RunMessageServer() {
-	listen, err := net.Listen("tcp", "127.0.0.1:9090")
+	port := viper.GetString("server.port")
+	if port == "" {
+		data.Logger.Warn("No port specified, use default port 9090")
+		port = "9090"
+	}
+	listen, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%s", port))
 	if err != nil {
 		fmt.Printf("Run message sever failed: %v\n", err)
 		return

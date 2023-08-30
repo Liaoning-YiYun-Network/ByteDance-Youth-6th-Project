@@ -1,18 +1,19 @@
 package controller
 
 import (
+	"SkyLine/dao"
+	"SkyLine/data"
 	"SkyLine/entity"
+	"SkyLine/perm"
+	"SkyLine/service"
+	"SkyLine/util"
+	"SkyLine/util/type_conv"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"sync/atomic"
 	"time"
 )
-
-var tempChat = map[string][]entity.Message{}
-
-var messageIdSequence = int64(1)
 
 type ChatResponse struct {
 	entity.Response
@@ -21,44 +22,88 @@ type ChatResponse struct {
 
 // MessageAction 向指定用户ID发送消息
 func MessageAction(c *gin.Context) {
-	token := c.Query("token")
-	toUserId := c.Query("to_user_id")
-	content := c.Query("content")
+	//!!! 请注意，这里的token是指用户A的token，而不是用户B的token
+	isValid, msg, user := perm.ValidateToken(c.Query("token"))
 
-	if user, exist := usersLoginInfo[token]; exist {
-		userIdB, _ := strconv.Atoi(toUserId)
-		chatKey := genChatKey(user.Id, int64(userIdB))
+	if isValid {
+		//!!! 由于本项目中API均为客户端调用，故不考虑为空的情况，但在REST API中，应该考虑为空的情况
+		userIdB, _ := strconv.Atoi(c.Query("to_user_id"))
+		content := c.Query("content")
+		chatKey := genChatKey(user.UserId, int64(userIdB))
 
-		atomic.AddInt64(&messageIdSequence, 1)
-		curMessage := entity.Message{
-			Id:         messageIdSequence,
+		dbName := fmt.Sprintf("messages-%v.sqlite", chatKey)
+		if !util.IsFileExist("./dbs/messages/" + dbName) {
+			data.Logger.Info("Database not exist: " + dbName + ", try to create it now")
+			_, err := dao.CreateDB(dao.MESSAGES, dbName)
+			if err != nil {
+				c.JSON(http.StatusOK, entity.Response{StatusCode: 1, StatusMsg: "Message sent failed due to database error"})
+				return
+			}
+		}
+
+		err := service.AddMessageByDBName(dbName, entity.DBMessage{
+			UserID:     user.UserId,
 			Content:    content,
 			CreateTime: time.Now().Format(time.Kitchen),
+		})
+		if err != nil {
+			c.JSON(http.StatusOK, entity.Response{StatusCode: 1, StatusMsg: "Message sent failed due to database error"})
+			return
 		}
 
-		if messages, exist := tempChat[chatKey]; exist {
-			tempChat[chatKey] = append(messages, curMessage)
-		} else {
-			tempChat[chatKey] = []entity.Message{curMessage}
-		}
-		c.JSON(http.StatusOK, entity.Response{StatusCode: 0})
+		c.JSON(http.StatusOK, entity.Response{StatusCode: 0, StatusMsg: "Message sent successfully"})
 	} else {
-		c.JSON(http.StatusOK, entity.Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		c.JSON(http.StatusOK, entity.Response{StatusCode: 1, StatusMsg: msg})
 	}
 }
 
 // MessageChat 查询与指定用户ID的聊天记录
 func MessageChat(c *gin.Context) {
 	token := c.Query("token")
-	toUserId := c.Query("to_user_id")
+	if token == "" {
+		c.JSON(http.StatusOK, ChatResponse{
+			Response:    entity.Response{StatusCode: 1, StatusMsg: "Query chat history failed due to empty token"},
+			MessageList: nil,
+		})
+		return
+	}
 
-	if user, exist := usersLoginInfo[token]; exist {
-		userIdB, _ := strconv.Atoi(toUserId)
-		chatKey := genChatKey(user.Id, int64(userIdB))
+	isValid, msg, user := perm.ValidateToken(token)
 
-		c.JSON(http.StatusOK, ChatResponse{Response: entity.Response{StatusCode: 0}, MessageList: tempChat[chatKey]})
+	if isValid {
+		//!!! 由于本项目中API均为客户端调用，故不考虑为空的情况，但在REST API中，应该考虑为空的情况
+		userIdB, _ := strconv.Atoi(c.Query("to_user_id"))
+		chatKey := genChatKey(user.UserId, int64(userIdB))
+
+		dbName := fmt.Sprintf("messages-%v.sqlite", chatKey)
+
+		if !util.IsFileExist("./dbs/messages/" + dbName) {
+			c.JSON(http.StatusOK, ChatResponse{
+				Response:    entity.Response{StatusCode: 0, StatusMsg: "Query chat history successfully"},
+				MessageList: nil,
+			})
+			return
+		}
+
+		messages, err := service.GetAllMessagesByDBName(dbName)
+		if err != nil {
+			c.JSON(http.StatusOK, ChatResponse{
+				Response:    entity.Response{StatusCode: 1, StatusMsg: "Query chat history failed due to database error"},
+				MessageList: nil,
+			})
+			return
+		}
+
+		list := type_conv.ToMessageList(messages)
+		c.JSON(http.StatusOK, ChatResponse{
+			Response:    entity.Response{StatusCode: 0, StatusMsg: "Query chat history successfully"},
+			MessageList: list,
+		})
 	} else {
-		c.JSON(http.StatusOK, entity.Response{StatusCode: 1, StatusMsg: "User doesn't exist"})
+		c.JSON(http.StatusOK, ChatResponse{
+			Response:    entity.Response{StatusCode: 1, StatusMsg: msg},
+			MessageList: nil,
+		})
 	}
 }
 
