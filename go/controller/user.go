@@ -56,41 +56,43 @@ func Register(c *gin.Context) {
 			Password: str,
 			State:    1,
 		}
-		//将用户信息存入数据库
-		err := service.CreateSQLUser(&sqlUser)
+		// 创建数据库文件
+		followDBName, err := dao.CreateDB(dao.FOLLOWS, strconv.FormatInt(userIdSequence, 10))
 		if err != nil {
+			data.Logger.Errorf("注册过程中创建关注者数据库失败：%s\n", err)
 			c.JSON(http.StatusOK, UserLoginResponse{
-				Response: entity.Response{StatusCode: 1, StatusMsg: "Register failed"},
+				Response: entity.Response{StatusCode: 1, StatusMsg: "Register failed due to followDB create failed"},
 			})
-			fmt.Println("Register failed due to database error:", err)
+			return
+		}
+		followerDBName, err := dao.CreateDB(dao.FOLLOWERS, strconv.FormatInt(userIdSequence, 10))
+		if err != nil {
+			_ = dao.DeleteDB(dao.FOLLOWS, followDBName)
+			data.Logger.Errorf("注册过程中创建粉丝数据库失败：%s\n", err)
+			c.JSON(http.StatusOK, UserLoginResponse{
+				Response: entity.Response{StatusCode: 1, StatusMsg: "Register failed due to followerDB create failed"},
+			})
+			return
+		}
+		favoriteDBName, err := dao.CreateDB(dao.FAVORITES, strconv.FormatInt(userIdSequence, 10))
+		if err != nil {
+			_ = dao.DeleteDB(dao.FOLLOWS, followDBName)
+			_ = dao.DeleteDB(dao.FOLLOWERS, followerDBName)
+			data.Logger.Errorf("注册过程中创建收藏夹数据库失败：%s\n", err)
+			c.JSON(http.StatusOK, UserLoginResponse{
+				Response: entity.Response{StatusCode: 1, StatusMsg: "Register failed due to favoriteDB create failed"},
+			})
 			return
 		}
 		token, err := util.GenerateToken(sqlUser)
 		if err != nil {
 			token = username + password
 		}
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: entity.Response{StatusCode: 0, StatusMsg: "Register success"},
-			UserId:   userIdSequence,
-			Token:    token,
-		})
 		err = dao.SetRedis(token, username)
 		if err != nil {
-			fmt.Println("Register success, but Redis occurred an error:", err)
+			data.Logger.Warnf("Set Redis KV Failed: %s", err)
 		}
-		followDBName, err := dao.CreateDB(dao.FOLLOWS, strconv.FormatInt(userIdSequence, 10))
-		if err != nil {
-			fmt.Println("Register success, but create followDB occurred an error:", err)
-		}
-		followerDBName, err := dao.CreateDB(dao.FOLLOWERS, strconv.FormatInt(userIdSequence, 10))
-		if err != nil {
-			fmt.Println("Register success, but create followerDB occurred an error:", err)
-		}
-		favoriteDBName, err := dao.CreateDB(dao.FAVORITES, strconv.FormatInt(userIdSequence, 10))
-		if err != nil {
-			fmt.Println("Register success, but create favoriteDB occurred an error:", err)
-		}
-		var userDetail = entity.UserDetail{
+		userDetail := entity.UserDetail{
 			ID:              userIdSequence,
 			Name:            username,
 			Avatar:          data.DefaultAvatar,
@@ -100,11 +102,34 @@ func Register(c *gin.Context) {
 			FollowerDB:      followerDBName,
 			FavoriteDB:      favoriteDBName,
 		}
+		err = service.CreateSQLUser(&sqlUser)
+		if err != nil {
+			_ = dao.DeleteDB(dao.FOLLOWS, followDBName)
+			_ = dao.DeleteDB(dao.FOLLOWERS, followerDBName)
+			_ = dao.DeleteDB(dao.FAVORITES, favoriteDBName)
+			c.JSON(http.StatusOK, UserLoginResponse{
+				Response: entity.Response{StatusCode: 1, StatusMsg: "Register failed due to database error"},
+			})
+			return
+		}
 		err = service.CreateUserDetail(&userDetail)
 		if err != nil {
-			fmt.Println("Register success, but UserDetail occurred an error:", err)
+			_ = dao.DeleteDB(dao.FOLLOWS, followDBName)
+			_ = dao.DeleteDB(dao.FOLLOWERS, followerDBName)
+			_ = dao.DeleteDB(dao.FAVORITES, favoriteDBName)
+			// TODO：该处错误需要处理！！！！！！
+			service.DeleteSQLUserById(int(userIdSequence))
+			c.JSON(http.StatusOK, UserLoginResponse{
+				Response: entity.Response{StatusCode: 1, StatusMsg: "Register failed due to database error"},
+			})
+			return
 		}
 		atomic.AddInt64(&userIdSequence, 1)
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: entity.Response{StatusCode: 0, StatusMsg: "Register Success"},
+			UserId:   sqlUser.UserId,
+			Token:    token,
+		})
 	}
 }
 
