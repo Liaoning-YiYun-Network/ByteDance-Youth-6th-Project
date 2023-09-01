@@ -54,6 +54,15 @@ func DeleteSQLUser(user *entity.SQLUser) error {
 	return dao.SqlSession.Delete(user).Error
 }
 
+// DeleteSQLUserById 根据提供的ID删除用户
+//
+// id: 用户ID
+//
+// return: 错误
+func DeleteSQLUserById(id int) error {
+	return dao.SqlSession.Where("userid = ?", id).Delete(&entity.SQLUser{}).Error
+}
+
 // GetSQLUserList 获取用户列表
 //
 // return: 用户列表/错误
