@@ -34,7 +34,6 @@ func RelationAction(c *gin.Context) {
 		_, hisFollower, err := service.GetFollowAndFollowerByUserid(int64(hisId))
 		if err != nil {
 			fmt.Println("获取失败")
-			c.JSON(http.StatusInternalServerError, entity.Response{StatusCode: 1, StatusMsg: "进行关注失败"})
 		} else {
 			tx := dao.SqlSession.Begin()
 			if err := service.ChangeFollowCount(int(user.UserId), true); err != nil {
@@ -58,7 +57,6 @@ func RelationAction(c *gin.Context) {
 		_, hisFollower, err := service.GetFollowAndFollowerByUserid(int64(hisId))
 		if err != nil {
 			fmt.Println("获取失败")
-			c.JSON(http.StatusInternalServerError, entity.Response{StatusCode: 1, StatusMsg: "进行取消关注失败"})
 		} else {
 			tx := dao.SqlSession.Begin()
 			if err := service.ChangeFollowCount(int(user.UserId), false); err != nil {

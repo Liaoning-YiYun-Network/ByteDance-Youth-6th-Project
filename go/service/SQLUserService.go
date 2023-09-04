@@ -54,6 +54,15 @@ func DeleteSQLUser(user *entity.SQLUser) error {
 	return dao.SqlSession.Delete(user).Error
 }
 
+// DeleteSQLUserById 根据提供的ID删除用户
+//
+// id: 用户ID
+//
+// return: 错误
+func DeleteSQLUserById(id int) error {
+	return dao.SqlSession.Where("userid = ?", id).Delete(&entity.SQLUser{}).Error
+}
+
 // GetSQLUserList 获取用户列表
 //
 // return: 用户列表/错误
@@ -70,7 +79,7 @@ func GetSQLUserList() ([]*entity.SQLUser, error) {
 //return 关注和粉丝所存储的数据库名
 
 func GetFollowAndFollowerByUserid(Userid int64) (follow, follower string, err error) {
-	var users entity.UserDetail
-	err = dao.SqlSession.Where("userid = ?", Userid).First(&users).Error
+	var users *entity.UserDetail
+	err = dao.SqlSession.Where("userid = ?", Userid).Find(&users).Error
 	return users.FollowDB, users.FollowerDB, err
 }
