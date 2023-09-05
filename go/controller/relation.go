@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SkyLine/dao"
 	"SkyLine/entity"
 	"SkyLine/perm"
 	"SkyLine/service"
@@ -34,8 +35,20 @@ func RelationAction(c *gin.Context) {
 		if err != nil {
 			fmt.Println("获取失败")
 		} else {
+			tx := dao.SqlSession.Begin()
+			if err := service.ChangeFollowCount(int(user.UserId), true); err != nil {
+				// 发生错误，回滚事务
+				tx.Rollback()
+			}
+			if err := service.ChangeFollowerCount(hisId, true); err != nil {
+				// 发生错误，回滚事务
+				tx.Rollback()
+			}
+			if err = tx.Commit().Error; err != nil {
+				c.JSON(http.StatusInternalServerError, entity.Response{StatusCode: 1, StatusMsg: "进行关注失败"})
+			}
 			service.AddFollowByDBName(myFollow, int64(hisId))
-			service.AddFollowByDBName(hisFollower, user.UserId)
+			service.AddFollowerByDBName(hisFollower, user.UserId)
 		}
 		c.JSON(http.StatusOK, entity.Response{StatusCode: 0})
 	}
@@ -45,8 +58,20 @@ func RelationAction(c *gin.Context) {
 		if err != nil {
 			fmt.Println("获取失败")
 		} else {
+			tx := dao.SqlSession.Begin()
+			if err := service.ChangeFollowCount(int(user.UserId), false); err != nil {
+				// 发生错误，回滚事务
+				tx.Rollback()
+			}
+			if err := service.ChangeFollowerCount(hisId, false); err != nil {
+				// 发生错误，回滚事务
+				tx.Rollback()
+			}
+			if err = tx.Commit().Error; err != nil {
+				c.JSON(http.StatusInternalServerError, entity.Response{StatusCode: 1, StatusMsg: "进行关注失败"})
+			}
 			service.DeleteFollowByDBName(myFollow, int64(hisId))
-			service.DeleteFollowByDBName(hisFollower, user.UserId)
+			service.DeleteFollowerByDBName(hisFollower, user.UserId)
 		}
 		c.JSON(http.StatusOK, entity.Response{StatusCode: 0})
 	}
