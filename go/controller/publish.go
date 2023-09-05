@@ -173,6 +173,45 @@ func Publish(c *gin.Context) {
 		fmt.Printf("文件%s上传成功！\n", newVideoName)
 	}
 
+	ud, err := service.GetUserDetailById(int(user.UserId))
+	if err != nil {
+		c.JSON(http.StatusOK, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "Failed to get user detail",
+		})
+		service.DeleteFile(newVideoName, service.VIDEO)
+		service.DeleteFile(coverName, service.VIDEO_COVER)
+		service.DeleteSQLVideo(&entity.SQLVideo{
+			AuthorId: user.UserId,
+			Title:    c.PostForm("title"),
+			PlayUrl:  videoUrl,
+			CoverUrl: coverUrl,
+		})
+		dao.DeleteDB(dao.COMMENTS, dbName)
+		c.JSON(http.StatusOK, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  coverName + " failed in uploading",
+		})
+		return
+	}
+	ud.WorkCount++
+	err = service.UpdateUserDetail(ud)
+	if err != nil {
+		service.DeleteFile(newVideoName, service.VIDEO)
+		service.DeleteFile(coverName, service.VIDEO_COVER)
+		service.DeleteSQLVideo(&entity.SQLVideo{
+			AuthorId: user.UserId,
+			Title:    c.PostForm("title"),
+			PlayUrl:  videoUrl,
+			CoverUrl: coverUrl,
+		})
+		dao.DeleteDB(dao.COMMENTS, dbName)
+		c.JSON(http.StatusOK, entity.Response{
+			StatusCode: 1,
+			StatusMsg:  "Failed to update user detail",
+		})
+		return
+	}
 	c.JSON(http.StatusOK, entity.Response{
 		StatusCode: 0,
 		StatusMsg:  "Publish success",
@@ -216,7 +255,7 @@ func PublishList(c *gin.Context) {
 			NextTime:  time.Now().Unix(),
 		})
 	}
-	publishListRequest := &entity.PublishListRequest{userid, c.Query("token")}
+	publishListRequest := &entity.PublishListRequest{UserId: userid, Token: c.Query("token")}
 	video, err := service.SelectVideoListByUserId(publishListRequest)
 	if err != nil {
 		fmt.Printf("视频获取出错:%v\n", err)

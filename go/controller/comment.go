@@ -91,6 +91,15 @@ func CommentAction(c *gin.Context) {
 				})
 				return
 			}
+			sv.CommentCount++
+			err = service.UpdateSQLVideo(sv)
+			if err != nil {
+				service.DeleteCommentByDBName(sv.CommentDB, newComment.Id)
+				c.JSON(http.StatusOK, CommentActionResponse{
+					Response: entity.Response{StatusCode: 1, StatusMsg: "Failed to update video"},
+				})
+				return
+			}
 			// 返回新评论
 			c.JSON(http.StatusOK, CommentActionResponse{
 				Response: entity.Response{StatusCode: 0},

@@ -21,6 +21,10 @@ func GetSQLVideosByAuthorId(id int) ([]*entity.SQLVideo, error) {
 	return videos, err
 }
 
+func UpdateSQLVideo(video *entity.SQLVideo) error {
+	return dao.SqlSession.Save(video).Error
+}
+
 func DeleteSQLVideo(video *entity.SQLVideo) error {
 	return dao.SqlSession.Delete(video).Error
 }
@@ -48,7 +52,7 @@ func SelectVideo(feedRequest *entity.FeedRequest) ([]entity.SQLVideo, error) {
 	return video, err
 }
 
-// SelectVideo 单个用户所发布视频的查询
+// SelectVideoListByUserId 单个用户所发布视频的查询
 //
 // # PublishListRequest
 //
