@@ -2,9 +2,10 @@
 package favorite
 
 import (
-"gorm.io/gorm"
-"gorm.io/gorm/clause"
-"gotik/model"
+"SkyLine/data"
+	"SkyLine/router"
+	"SkyLine/service"
+	"fmt"
 )
 
 type Result struct {
