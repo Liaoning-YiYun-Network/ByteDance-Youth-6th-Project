@@ -37,6 +37,7 @@ func FavoriteAction(c *gin.Context) {
 			}
 			err = service.AddFavoriteByDBName(ud.FavoriteDB, int64(vidInt))
 			if err != nil {
+				data.Logger.Errorf("???:%v", err)
 				c.JSON(http.StatusOK, entity.Response{StatusCode: 1, StatusMsg: "Failed to add favorite"})
 				sv.FavoriteCount--
 				//TODO：此处的错误需要处理！！！

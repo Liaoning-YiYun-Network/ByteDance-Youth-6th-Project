@@ -26,8 +26,15 @@ var tmpIdSequence map[int]int64
 
 var tmpIdInitialized map[int]bool
 
+var tmpInitialized = false
+
 // CommentAction add or delete comment
 func CommentAction(c *gin.Context) {
+	if !tmpInitialized {
+		tmpIdSequence = make(map[int]int64)
+		tmpIdInitialized = make(map[int]bool)
+		tmpInitialized = true
+	}
 	token := c.Query("token")
 	vidInt, _ := strconv.Atoi(c.Query("video_id"))
 	sv, err := service.GetSQLVideoById(vidInt)
@@ -77,7 +84,7 @@ func CommentAction(c *gin.Context) {
 				Id:         tmpIdSequence[vidInt],
 				User:       user,
 				Content:    commentText,
-				CreateDate: time.Now().Format("MM-DD"),
+				CreateDate: time.Now().Format("01-02"),
 			}
 			// 在数据库中添加评论
 			err = service.AddCommentByDBName(sv.CommentDB, entity.DBComment{

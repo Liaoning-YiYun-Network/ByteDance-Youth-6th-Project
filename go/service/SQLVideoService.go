@@ -17,7 +17,7 @@ func GetSQLVideoById(id int) (*entity.SQLVideo, error) {
 
 func GetSQLVideosByAuthorId(id int) ([]*entity.SQLVideo, error) {
 	var videos []*entity.SQLVideo
-	err := dao.SqlSession.Where("user_id = ?", id).Find(&videos).Error
+	err := dao.SqlSession.Where("userid = ?", id).Find(&videos).Error
 	return videos, err
 }
 

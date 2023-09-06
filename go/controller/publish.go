@@ -2,6 +2,7 @@ package controller
 
 import (
 	"SkyLine/dao"
+	"SkyLine/data"
 	"SkyLine/entity"
 	"SkyLine/service"
 	"SkyLine/util"
@@ -283,13 +284,34 @@ func PublishList(c *gin.Context) {
 			TotalFavorited:  video[i].UserDetail.TotalFavorited,
 			WorkCount:       video[i].UserDetail.WorkCount,
 		}
+		var tag bool
+		ls, err := service.GetUserDetailById(int(userid))
+		if err != nil {
+			data.Logger.Errorf("Try to get user detail failed: %v", err)
+			tag = false
+		} else {
+			tag = true
+		}
+		var isFav = false
+		if tag {
+			lss, err := service.GetAllFavoritesByDBName(ls.FavoriteDB)
+			if err != nil {
+				data.Logger.Errorf("Try to get user detail failed: %v", err)
+			} else {
+				for _, value := range lss {
+					if value == video[i].VideoId {
+						isFav = true
+					}
+				}
+			}
+		}
 		douyinVideo := &entity.DouyinVideo{
 			Author:        author,
 			CommentCount:  video[i].CommentCount,
 			CoverURL:      video[i].CoverUrl,
 			FavoriteCount: video[i].FavoriteCount,
 			ID:            video[i].VideoId,
-			IsFavorite:    video[i].IsFollow,
+			IsFavorite:    isFav,
 			PlayURL:       video[i].PlayUrl,
 			Title:         video[i].Title,
 		}

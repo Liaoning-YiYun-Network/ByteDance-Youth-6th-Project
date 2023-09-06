@@ -10,7 +10,6 @@ type SQLVideo struct {
 	FavoriteCount int64      `gorm:"column:favorite_count"` // 视频的点赞总数
 	CommentCount  int64      `gorm:"column:comment_count"`  // 视频的评论总数
 	CommentDB     string     `gorm:"column:comment_db"`     // 评论数据库
-	IsFollow      bool       `gorm:"-"`                     // true-已关注，false-未关注
 }
 
 func (SQLVideo) TableName() string {

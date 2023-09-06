@@ -1,7 +1,7 @@
 package entity
 
 type UserDetail struct {
-	ID              int64  `gorm:"column:userid"`
+	ID              int64  `gorm:"column:userid;primary_key"`
 	Avatar          string `gorm:"column:avatar"`           // 用户头像
 	BackgroundImage string `gorm:"column:background_image"` // 用户个人页顶部大图
 	FavoriteCount   int64  `gorm:"column:favorite_count"`   // 喜欢数

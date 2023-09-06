@@ -25,8 +25,8 @@ func GetUserDetailByName(name string) (*entity.UserDetail, error) {
 }
 
 // UpdateUserDetail 更新用户详情
-func UpdateUserDetail(userDetail *entity.UserDetail) error {
-	return dao.SqlSession.Save(userDetail).Error
+func UpdateUserDetail(userdetail *entity.UserDetail) error {
+	return dao.SqlSession.Save(&userdetail).Error
 }
 
 // DeleteUserDetail 删除用户详情

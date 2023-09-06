@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SkyLine/data"
 	"SkyLine/entity"
 	"SkyLine/perm"
 	"SkyLine/service"
@@ -24,8 +25,14 @@ type FeedResponse struct {
 // @Router       /douyin/feed [get]
 func Feed(c *gin.Context) {
 	token := c.Query("token")
-	feedRequest := &entity.FeedRequest{nil, nil}
+	feedRequest := &entity.FeedRequest{}
 	video, err := service.SelectVideo(feedRequest)
+	var isValid bool
+	var user *entity.SQLUser
+	if token != "" {
+		isValid, _, user = perm.ValidateToken(token)
+
+	}
 	if err != nil {
 		fmt.Printf("视频获取出错:%v\n", err)
 		c.JSON(http.StatusInternalServerError, entity.FeedResponse{
@@ -51,32 +58,49 @@ func Feed(c *gin.Context) {
 			TotalFavorited:  video[i].UserDetail.TotalFavorited,
 			WorkCount:       video[i].UserDetail.WorkCount,
 		}
+		var tag bool
+		ls, err := service.GetUserDetailById(int(user.UserId))
+		if err != nil {
+			data.Logger.Errorf("Try to get user detail failed: %v", err)
+			tag = false
+		} else {
+			tag = true
+		}
+		var isFav = false
+		if tag {
+			lss, err := service.GetAllFavoritesByDBName(ls.FavoriteDB)
+			if err != nil {
+				data.Logger.Errorf("Try to get user detail failed: %v", err)
+			} else {
+				for _, value := range lss {
+					if value == video[i].VideoId {
+						isFav = true
+					}
+				}
+			}
+		}
+
 		douyinVideo := &entity.DouyinVideo{
 			Author:        author,
 			CommentCount:  video[i].CommentCount,
 			CoverURL:      video[i].CoverUrl,
 			FavoriteCount: video[i].FavoriteCount,
 			ID:            video[i].VideoId,
-			IsFavorite:    video[i].IsFollow,
+			IsFavorite:    isFav,
 			PlayURL:       video[i].PlayUrl,
 			Title:         video[i].Title,
 		}
 		douyinVideos[i] = *douyinVideo
 	}
-	if token != "" {
-		_, _, user := perm.ValidateToken(token)
-		if user != nil {
-			douyinVideos = IsFollow(douyinVideos, user.UserId)
-		}
+	if isValid {
+		douyinVideos = IsFollow(douyinVideos, user.UserId)
 	}
 	//待根据业务逻辑，将查询到的东西返回前端
 	c.JSON(http.StatusOK, entity.FeedResponse{
 		Response: entity.Response{StatusCode: 0, StatusMsg: "获取视频成功"},
 		//真实数据
 		VideoList: douyinVideos,
-		//为方便测试伪造的数据
-		//VideoList: data.Videos,
-		NextTime: time.Now().Unix(),
+		NextTime:  time.Now().Unix(),
 	})
 }
 

@@ -34,7 +34,7 @@ func MessageAction(c *gin.Context) {
 		dbName := fmt.Sprintf("messages-%v.sqlite", chatKey)
 		if !util.IsFileExist("./dbs/messages/" + dbName) {
 			data.Logger.Info("Database not exist: " + dbName + ", try to create it now")
-			_, err := dao.CreateDB(dao.MESSAGES, dbName)
+			_, err := dao.CreateDB(dao.MESSAGES, chatKey)
 			if err != nil {
 				c.JSON(http.StatusOK, entity.Response{StatusCode: 1, StatusMsg: "Message sent failed due to database error"})
 				return
