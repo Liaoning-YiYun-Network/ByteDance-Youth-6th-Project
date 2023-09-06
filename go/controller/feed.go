@@ -2,6 +2,7 @@ package controller
 
 import (
 	"SkyLine/entity"
+	"SkyLine/perm"
 	"SkyLine/service"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,7 @@ type FeedResponse struct {
 // @Param        Token  query  string  false  "该参数只有在用户登录状态下进行设置"
 // @Router       /douyin/feed [get]
 func Feed(c *gin.Context) {
+	token := c.Query("token")
 	feedRequest := &entity.FeedRequest{nil, nil}
 	video, err := service.SelectVideo(feedRequest)
 	if err != nil {
@@ -61,6 +63,12 @@ func Feed(c *gin.Context) {
 		}
 		douyinVideos[i] = *douyinVideo
 	}
+	if token != "" {
+		_, _, user := perm.ValidateToken(token)
+		if user != nil {
+			douyinVideos = IsFollow(douyinVideos, user.UserId)
+		}
+	}
 	//待根据业务逻辑，将查询到的东西返回前端
 	c.JSON(http.StatusOK, entity.FeedResponse{
 		Response: entity.Response{StatusCode: 0, StatusMsg: "获取视频成功"},
@@ -70,4 +78,44 @@ func Feed(c *gin.Context) {
 		//VideoList: data.Videos,
 		NextTime: time.Now().Unix(),
 	})
+}
+
+func IsFollow(douyinVideos []entity.DouyinVideo, id int64) []entity.DouyinVideo {
+	userDetail, err := service.GetUserDetailById(int(id))
+	if err != nil {
+		fmt.Println(err)
+	}
+	isFollow := make(map[int64]bool)
+	for i := 0; i < len(douyinVideos); i++ {
+		if _, ok := isFollow[douyinVideos[i].Author.ID]; !ok {
+			isFollow[douyinVideos[i].Author.ID] = false
+		}
+	}
+	var ids []int64
+	for key := range isFollow {
+		ids = append(ids, key)
+	}
+	userIds, err := service.GetFollowByUserIds(userDetail.FollowDB, ids)
+	if err != nil {
+		return nil
+	}
+	for i := 0; i < len(douyinVideos); i++ {
+		if contains(userIds, douyinVideos[i].Author.ID) {
+			douyinVideos[i].Author.IsFollow = true
+		} else {
+			douyinVideos[i].Author.IsFollow = false
+		}
+	}
+
+	return douyinVideos
+}
+
+func contains(slice []int, target int64) bool {
+	id := int(target)
+	for _, element := range slice {
+		if element == id {
+			return true
+		}
+	}
+	return false
 }
