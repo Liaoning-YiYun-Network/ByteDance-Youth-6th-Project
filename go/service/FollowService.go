@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"strconv"
+	"strings"
 )
 
 // GetAllFollowsByDBName 根据数据库名称获取所有关注
@@ -111,4 +113,77 @@ func GetFollowByUserId(dbName string, userId int64) (bool, error) {
 		_, err = db.Exec("SELECT * FROM follows WHERE userid = ?", userId)
 	}
 	return false, nil
+}
+
+func GetFollowByUserIds(dbName string, ids []int64) ([]int, error) {
+	if db, ok := data.TempSQLiteConnects[dbName]; ok {
+		args := make([]interface{}, len(ids))
+		for i, id := range ids {
+			args[i] = strconv.FormatInt(id, 10)
+		}
+		var sql strings.Builder
+		sql.WriteString("SELECT * FROM follows WHERE userid IN(")
+		sql.WriteString("")
+		for i := 0; i < len(ids); i++ {
+			sql.WriteString("?")
+			if i == len(ids)-1 {
+				break
+			}
+			sql.WriteString(",")
+		}
+		sql.WriteString(")")
+		query, err := db.Query(sql.String(), args...)
+		if err != nil {
+			fmt.Printf("读取错误:%s", err)
+		}
+		var userid []int
+		for query.Next() {
+			var column1 int
+			// 将查询结果映射到变量
+			err3 := query.Scan(&column1)
+			if err3 != nil {
+				fmt.Println("扫描结果错误:", err3)
+			}
+			userid = append(userid, column1)
+		}
+		return userid, nil
+
+	} else {
+		db, err := sql.Open("sqlite3", "./dbs/follows/"+dbName)
+		if err != nil {
+			return nil, fmt.Errorf("尝试打开SQLite数据库时发生错误：%s", err)
+		}
+		args := make([]interface{}, len(ids))
+		for i, id := range ids {
+			args[i] = strconv.FormatInt(id, 10)
+		}
+		var sql strings.Builder
+		sql.WriteString("SELECT * FROM follows WHERE userid IN(")
+		sql.WriteString("")
+		for i := 0; i < len(ids); i++ {
+			sql.WriteString("?")
+			if i == len(ids)-1 {
+				break
+			}
+			sql.WriteString(",")
+		}
+		sql.WriteString(")")
+		query, err := db.Query(sql.String(), args...)
+		fmt.Printf("%#v", query)
+		if err != nil {
+			fmt.Printf("读取错误:%s", err)
+		}
+		var userid []int
+		for query.Next() {
+			var column1 int
+			// 将查询结果映射到变量
+			err3 := query.Scan(&column1)
+			if err3 != nil {
+				fmt.Println("扫描结果错误:", err3)
+			}
+			userid = append(userid, column1)
+		}
+		return userid, nil
+
+	}
 }
